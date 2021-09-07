@@ -23,10 +23,13 @@ int main() {
 	glfwMakeContextCurrent(window);
     ASSERT(!glewInit(), "Glew Init successful. (%s)", "Glew init failed with code %s", glewGetErrorString(glewInit()));
 	glfwSetWindowTitle(window, "Playground");
-	glClearColor(0.0f, 0.0f, 0.3f, 0.0f);
-	do{
+	glClearColor(0.0f, 0.0f, 0.3f, 1.0f);
+	glClear(GL_COLOR_BUFFER_BIT);
+	while (!glfwWindowShouldClose(window)){
 		glfwSwapBuffers(window);
-	}while(glfwGetKey(window, GLFW_KEY_ESCAPE) != GLFW_PRESS);
+		glfwPollEvents();
+	}
+
 	glfwTerminate();
 
 	return 0;
