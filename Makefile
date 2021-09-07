@@ -5,7 +5,8 @@ LIB_FOLDER = lib
 SRC_DIR = src
 
 CC = gcc-9
-CFLAGS = -Wall -Wextra -O0 -g -I$(LIB_FOLDER)/include/ -I$(SRC_DIR)/include/
+CFLAGS = -Wall -Wextra -O0 -g -I$(LIB_FOLDER)/include/ -I$(SRC_DIR)/include/ $(shell pkg-config --cflags glfw3 gl)
+LDFLAGS = $(shell pkg-config --libs gl glew glfw3)
 
 BUILD = build
 
@@ -30,7 +31,7 @@ NODEBUG: $(BIN)
 	@./$<
 
 $(BIN): $(OBJ)
-	@gcc -pthread  $(OBJ) -o $@
+	@$(CC) $(OBJ) $(LDFLAGS) -o $@
 
 $(BUILD)/%.o: %.c
 	@$(CC) -o $@ $(CFLAGS) $(INTERNALCFLAGS) -c $<

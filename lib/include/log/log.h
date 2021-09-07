@@ -39,4 +39,7 @@
 #define ASSERT(C, __TRUE, __FALSE, ...) {if(C){ LOG_OK(__TRUE, ##__VA_ARGS__); } else { PANIC(__FALSE, ##__VA_ARGS__);}}
 #define CHECK(C, __TRUE, __FALSE, ...) {if(C){ LOG_OK(__TRUE, ##__VA_ARGS__); } else { LOG_ERR(__FALSE, ##__VA_ARGS__);}}
 
+#define qASSERT(C) {if(C){ LOG_OK(#C); } else { LOG_PANIC(#C); CRITICAL_ERROR();}}
+#define qCHECK(C) {if(C){ LOG_OK(#C); } else { LOG_ERR(#C);}}
+
 #endif
