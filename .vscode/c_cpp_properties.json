@@ -1,0 +1,22 @@
+{
+    "configurations": [
+        {
+            "name": "Linux",
+            "includePath": [
+                "${default}",
+                "${workspaceFolder}/lib/include/",
+                "${workspaceFolder}/lib/include",
+                "${workspaceFolder}/src/include/",
+                "${workspaceFolder}/src/include"
+            ],
+            "defines": [
+                "__linux__",
+                "__x86_64__",
+                "_GNU_SOURCE"
+            ],
+            "compilerPath": "/usr/bin/gcc-9",
+            "cStandard": "c17"
+        }
+    ],
+    "version": 4
+}
