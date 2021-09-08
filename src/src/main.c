@@ -17,8 +17,7 @@
 
 int main() {
     GLFWwindow* window = glinit();
-	
-#if 0
+
 	float vertices[] = {
 	    -0.5f, -0.5f, 0.0f,
 	    0.5f, -0.5f, 0.0f,
@@ -62,7 +61,6 @@ int main() {
 	glLinkProgram(shaderProgram);
 
 	glUseProgram(shaderProgram);
-#endif
 
 	test();
 

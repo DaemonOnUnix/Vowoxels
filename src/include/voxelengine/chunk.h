@@ -15,6 +15,12 @@ enum voxel_mask {
     Yp = 32
 };
 
+struct Vertex {
+    float x; 
+    float y;
+    float z;
+};
+
 typedef struct {
     int32_t chunk_x;
     int32_t chunk_y;
@@ -22,6 +28,12 @@ typedef struct {
 
     int32_t voxel_list[CHUNK_NUM_VOXEL];
     enum voxel_mask voxel_mask[CHUNK_NUM_VOXEL];
+
+    struct Vertex vertex_buffer[4*6*CHUNK_NUM_VOXEL];
+    int64_t vertex_count;
+
+    int triangles_buffer[6*6*CHUNK_NUM_VOXEL];
+    int64_t triangles_count;
 } Chunk;
 
 #define CHUNK_TO_INDEX(index, prefix) {. prefix##x = (index)%(CHUNK_DIMENSION),\
