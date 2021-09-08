@@ -13,6 +13,8 @@
 
 #include "gl/manager.h"
 
+#include "tests/testground.h"
+
 int main() {
     GLFWwindow* window = glinit();
 	
@@ -63,8 +65,11 @@ int main() {
 #endif
 
 	while (!glfwWindowShouldClose(window)){
-		glClearColor(0.0f, 0.0f, 1.0f, 1.0f);
+		glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+		tests(window);
+
 		glfwSwapBuffers(window);
 		glfwPollEvents();
 	}
