@@ -29,4 +29,8 @@ typedef struct {
     . prefix##z = ((index)/((CHUNK_DIMENSION)*(CHUNK_DIMENSION)))}
 #define INDEX_TO_CHUNK(x, y, z) ((x) + ((CHUNK_DIMENSION) * (y)) + ((CHUNK_DIMENSION) * (CHUNK_DIMENSION) * z))
 
+unsigned char saveChunkToFile(Chunk* chunk, char* dir);
+char* create_filename(char* dir, int32_t chunk_x, int32_t chunk_y, int32_t chunk_z);
+
+
 #endif

@@ -3,4 +3,6 @@
 
 void tests(void*);
 
+void test();
+
 #endif
