@@ -70,6 +70,7 @@ int main() {
 
 		tests(window);
 
+
 		glfwSwapBuffers(window);
 		glfwPollEvents();
 	}

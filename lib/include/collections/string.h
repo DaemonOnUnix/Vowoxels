@@ -30,5 +30,6 @@ void _pog_free_str(pogstr* x);
 #define selector2(a, f2, f1, ...) f1
 #define string(...) ( selector2(__VA_ARGS__, string2, string1) (__VA_ARGS__) )
 
+#define str_pog_len(x) (GET_HEADER(x)->len)
 
 #endif
