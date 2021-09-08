@@ -39,11 +39,11 @@ typedef struct {
 #define CHUNK_TO_INDEX(index, prefix) {. prefix##x = (index)%(CHUNK_DIMENSION),\
     . prefix##y = ((index)%((CHUNK_DIMENSION)*(CHUNK_DIMENSION))/(CHUNK_DIMENSION)),\
     . prefix##z = ((index)/((CHUNK_DIMENSION)*(CHUNK_DIMENSION)))}
-#define INDEX_TO_CHUNK(x, y, z) ((x) + ((CHUNK_DIMENSION) * (y)) + ((CHUNK_DIMENSION) * (CHUNK_DIMENSION) * z))
+#define INDEX_TO_CHUNK(x, y, z) ((x) + ((CHUNK_DIMENSION) * (y)) + ((CHUNK_DIMENSION) * (CHUNK_DIMENSION) * (z)))
 
 unsigned char saveChunkToFile(Chunk* chunk, char* dir);
 char* create_filename(char* dir, int32_t chunk_x, int32_t chunk_y, int32_t chunk_z);
 Chunk* loadChunkFromFile(char* dir, int32_t chunk_x, int32_t chunk_y, int32_t chunk_z);
-
+void updateChunkVertex(Chunk* chunk);
 
 #endif

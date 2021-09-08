@@ -13,5 +13,8 @@ void tests(void* pika){
 }
 
 void test(){
-    
+    Chunk* chunk = malloc(sizeof(Chunk));
+    chunk->voxel_list[0] = 1;
+    chunk->voxel_list[1] = 1;
+    updateChunkVertex(chunk);
 }

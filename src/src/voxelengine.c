@@ -132,7 +132,7 @@ void updateChunkVertex(Chunk* chunk){
     for(size_t x = 0; x < CHUNK_DIMENSION; x++){
         for(size_t y = 0; y < CHUNK_DIMENSION; y++){
             for(size_t z = 0; z < CHUNK_DIMENSION; z++){
-                if(chunk->voxel_list[INDEX_TO_CHUNK(x, y, z)] != 0){
+                if(chunk->voxel_list[INDEX_TO_CHUNK(x, y, z)] == 0){
                     continue;
                 }
 
@@ -141,29 +141,29 @@ void updateChunkVertex(Chunk* chunk){
                 char nb_vertex = 0;
 
                 // Check vertex need
-                if(x > 0 && !chunk->voxel_list[INDEX_TO_CHUNK(x-1, y, z)]){
+                if((x > 0 && !chunk->voxel_list[INDEX_TO_CHUNK(x-1, y, z)]) || x == 0){
                     vertex_mask |= (SUMMIT_sue | SUMMIT_suw | SUMMIT_sde | SUMMIT_sdw);
                     face_mask |= SUMMIT_s;
                 }
-                if(x < CHUNK_DIMENSION-1 && !chunk->voxel_list[INDEX_TO_CHUNK(x+1, y, z)]){
+                if((x < CHUNK_DIMENSION-1 && !chunk->voxel_list[INDEX_TO_CHUNK(x+1, y, z)]) || x == CHUNK_DIMENSION-1){
                     vertex_mask |= (SUMMIT_nue | SUMMIT_nuw | SUMMIT_nde | SUMMIT_ndw);
                     face_mask |= SUMMIT_n;
                 }
-                if(y > 0 && !chunk->voxel_list[INDEX_TO_CHUNK(x, y-1, z)]){
-                    vertex_mask |= (SUMMIT_nde | SUMMIT_nde | SUMMIT_ndw | SUMMIT_ndw);
+                if((y > 0 && !chunk->voxel_list[INDEX_TO_CHUNK(x, y-1, z)]) || y == 0){
+                    vertex_mask |= (SUMMIT_sdw | SUMMIT_sde | SUMMIT_ndw | SUMMIT_nde);
                     face_mask |= SUMMIT_d;
                 }
-                if(y < CHUNK_DIMENSION-1 && !chunk->voxel_list[INDEX_TO_CHUNK(x, y+1, z)]){
+                if((y < CHUNK_DIMENSION-1 && !chunk->voxel_list[INDEX_TO_CHUNK(x, y+1, z)]) || y == CHUNK_DIMENSION-1){
                     vertex_mask |= (SUMMIT_nue | SUMMIT_sue | SUMMIT_nuw | SUMMIT_suw);
                     face_mask |= SUMMIT_u;
                 }
-                if(z > 0 && !chunk->voxel_list[INDEX_TO_CHUNK(x, y, z+1)]){
-                    vertex_mask |= (SUMMIT_nde | SUMMIT_sde | SUMMIT_nue | SUMMIT_sue);
-                    face_mask |= SUMMIT_e;
-                }
-                if(z < CHUNK_DIMENSION-1 && !chunk->voxel_list[INDEX_TO_CHUNK(x, y, z+1)]){
+                if((z > 0 && !chunk->voxel_list[INDEX_TO_CHUNK(x, y, z-1)]) || z == 0){
                     vertex_mask |= (SUMMIT_ndw | SUMMIT_sdw | SUMMIT_nuw | SUMMIT_suw);
                     face_mask |= SUMMIT_w;
+                }
+                if((z < CHUNK_DIMENSION-1 && !chunk->voxel_list[INDEX_TO_CHUNK(x, y, z+1)]) || z == CHUNK_DIMENSION-1){
+                    vertex_mask |= (SUMMIT_nde | SUMMIT_sde | SUMMIT_nue | SUMMIT_sue);
+                    face_mask |= SUMMIT_e;
                 }
 
                 // Add vertex to buffer
@@ -302,4 +302,6 @@ void updateChunkVertex(Chunk* chunk){
     }
     chunk->vertex_count = vertex_count;
     chunk->triangles_count = triangles_count;
+    LOG_INFO("Vertex count : %lu", chunk->vertex_count);
+    LOG_INFO("Triangles count : %lu", chunk->triangles_count);
 }
