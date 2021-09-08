@@ -27,7 +27,7 @@ bool saveChunkToFile(Chunk* chunk, char* dir){
     // Create filename
     smartstr pogstr filename = create_filename(dir, chunk->chunk_x, chunk->chunk_y, chunk->chunk_z);
 
-    int chunk_fd = open(filename, O_CREAT | O_TRUNC | O_WRONLY | S_IRUSR | S_IWUSR);
+    int chunk_fd = open(filename, O_CREAT | O_TRUNC | O_WRONLY, 0644);
     if(!chunk_fd) {
         LOG_PANIC("Error while loading chunk file '%s'", filename);
         return 0;
