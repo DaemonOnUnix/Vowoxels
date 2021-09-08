@@ -5,7 +5,9 @@
 #include <fcntl.h>
 #include <stddef.h>
 
+#ifndef bool
 #define bool unsigned char
+#endif
 
 void newChunk(Chunk* new){
     UNUSED(new);
@@ -22,7 +24,7 @@ pogstr create_filename(char* dir, int32_t chunk_x, int32_t chunk_y, int32_t chun
     return filename;
 }
 
-bool saveChunkToFile(Chunk* chunk, char* dir){
+unsigned char saveChunkToFile(Chunk* chunk, char* dir){
     
     // Create filename
     smartstr pogstr filename = create_filename(dir, chunk->chunk_x, chunk->chunk_y, chunk->chunk_z);
@@ -76,7 +78,6 @@ Chunk* loadChunkFromFile(char* dir, int32_t chunk_x, int32_t chunk_y, int32_t ch
     // Read Chunk
     int chunk_fd = open(filename, O_RDONLY);
     if(!chunk_fd) {
-        LOG_PANIC("Error while loading chunk file '%s'", filename);
         return NULL;
     }
     smartstr pogstr _data = UNWRAP(pogstr, _string_from_fd(chunk_fd, 0));
@@ -132,6 +133,7 @@ void updateChunkVertex(Chunk* chunk){
     for(size_t x = 0; x < CHUNK_DIMENSION; x++){
         for(size_t y = 0; y < CHUNK_DIMENSION; y++){
             for(size_t z = 0; z < CHUNK_DIMENSION; z++){
+
                 if(chunk->voxel_list[INDEX_TO_CHUNK(x, y, z)] == 0){
                     continue;
                 }
@@ -139,29 +141,30 @@ void updateChunkVertex(Chunk* chunk){
                 char vertex_mask = 0;
                 char face_mask = 0;
                 char nb_vertex = 0;
+                char offset = 0;
 
                 // Check vertex need
-                if((x > 0 && !chunk->voxel_list[INDEX_TO_CHUNK(x-1, y, z)]) || x == 0){
+                if((x == 0 || !chunk->voxel_list[INDEX_TO_CHUNK(x-1, y, z)])){
                     vertex_mask |= (SUMMIT_sue | SUMMIT_suw | SUMMIT_sde | SUMMIT_sdw);
                     face_mask |= SUMMIT_s;
                 }
-                if((x < CHUNK_DIMENSION-1 && !chunk->voxel_list[INDEX_TO_CHUNK(x+1, y, z)]) || x == CHUNK_DIMENSION-1){
+                if((x == CHUNK_DIMENSION-1 || !chunk->voxel_list[INDEX_TO_CHUNK(x+1, y, z)])) {
                     vertex_mask |= (SUMMIT_nue | SUMMIT_nuw | SUMMIT_nde | SUMMIT_ndw);
                     face_mask |= SUMMIT_n;
                 }
-                if((y > 0 && !chunk->voxel_list[INDEX_TO_CHUNK(x, y-1, z)]) || y == 0){
+                if((y == 0 || !chunk->voxel_list[INDEX_TO_CHUNK(x, y-1, z)]) ){
                     vertex_mask |= (SUMMIT_sdw | SUMMIT_sde | SUMMIT_ndw | SUMMIT_nde);
                     face_mask |= SUMMIT_d;
                 }
-                if((y < CHUNK_DIMENSION-1 && !chunk->voxel_list[INDEX_TO_CHUNK(x, y+1, z)]) || y == CHUNK_DIMENSION-1){
+                if((y == CHUNK_DIMENSION-1 || !chunk->voxel_list[INDEX_TO_CHUNK(x, y+1, z)]) ){
                     vertex_mask |= (SUMMIT_nue | SUMMIT_sue | SUMMIT_nuw | SUMMIT_suw);
                     face_mask |= SUMMIT_u;
                 }
-                if((z > 0 && !chunk->voxel_list[INDEX_TO_CHUNK(x, y, z-1)]) || z == 0){
+                if((z == 0 || !chunk->voxel_list[INDEX_TO_CHUNK(x, y, z-1)])){
                     vertex_mask |= (SUMMIT_ndw | SUMMIT_sdw | SUMMIT_nuw | SUMMIT_suw);
                     face_mask |= SUMMIT_w;
                 }
-                if((z < CHUNK_DIMENSION-1 && !chunk->voxel_list[INDEX_TO_CHUNK(x, y, z+1)]) || z == CHUNK_DIMENSION-1){
+                if((z == CHUNK_DIMENSION-1 || !chunk->voxel_list[INDEX_TO_CHUNK(x, y, z+1)])){
                     vertex_mask |= (SUMMIT_nde | SUMMIT_sde | SUMMIT_nue | SUMMIT_sue);
                     face_mask |= SUMMIT_e;
                 }
@@ -201,7 +204,6 @@ void updateChunkVertex(Chunk* chunk){
                 }
                 
                 // Add triangles to buffer
-                char offset = 0;
                 if(face_mask & SUMMIT_d){
                     chunk->triangles_buffer[triangles_count++] = vertex_count-nb_vertex+3;
                     chunk->triangles_buffer[triangles_count++] = vertex_count-nb_vertex+1;

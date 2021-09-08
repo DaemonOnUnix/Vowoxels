@@ -5,5 +5,6 @@
 
 GLFWwindow* glinit();
 void glend();
+void bindShader();
 
 #endif

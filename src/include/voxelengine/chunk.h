@@ -2,7 +2,7 @@
 #define VOXELENGINE_CHUNK_H
 
 #include <stdint.h>
-
+#include "../linear_algebra/vec3.h"
 #define CHUNK_DIMENSION 10
 #define CHUNK_NUM_VOXEL (CHUNK_DIMENSION * CHUNK_DIMENSION * CHUNK_DIMENSION)
 

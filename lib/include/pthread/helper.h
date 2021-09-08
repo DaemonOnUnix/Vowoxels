@@ -6,4 +6,6 @@
 #define PTHREAD_PROTO(FUNC_NAME) void* FUNC_NAME(void* __pthread_parameter)
 #define PTHREAD_GET_PARAMETERS(T) (*((T*)__pthread_parameter))
 
+#define PTHREAD_OBJECT(NAME) void* (*NAME)(void* __pthread_parameter)
+
 #endif
