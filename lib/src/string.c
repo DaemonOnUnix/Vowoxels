@@ -37,11 +37,28 @@ pogstr _string(char* str, size_t optional_size){
 }
 
 Maybe(pogstr) _string_from_fd(int fd, size_t capacity){
-    _string_comp buffer = (_string_comp)(GET_HEADER( _string("", capacity) ));
-    int e = read(fd, buffer->data, capacity-1);
-    buffer->data[e] = 0;
-    if(e)
-        LOG_OK("Receiving message of length %d, message : %s", e, buffer->data);
+    int e;
+    _string_comp buffer;
+    if(!capacity){
+        buffer = (_string_comp)(GET_HEADER(_string("", 0)));
+        size_t previous_end = 0;
+        while(1){
+            buffer = (_string_comp)realloc(buffer, sizeof(struct collection_header) + capacity + 50);
+            e = read(fd, buffer->data + previous_end, 50);
+            if(e <= 0)
+                break;
+            if(e)
+                LOG_OK("Receiving message of length %d, message : %s", e, buffer->data);
+            capacity += 50;
+            previous_end += e;
+        }
+    } else{
+        buffer = (_string_comp)(GET_HEADER( _string("", capacity) ));
+        e = read(fd, buffer->data, capacity-1);
+        buffer->data[e] = 0;
+        if(e)
+            LOG_OK("Receiving message of length %d, message : %s", e, buffer->data);
+    }
     MAYBE_IF(e != -1, pogstr, buffer->data);
 }
 

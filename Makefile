@@ -5,8 +5,8 @@ LIB_FOLDER = lib
 SRC_DIR = src
 
 CC = gcc-9
-CFLAGS = -Wall -Wextra -O0 -g -fsanitize=undefined -I$(LIB_FOLDER)/include/ -I$(SRC_DIR)/include/ $(shell pkg-config --cflags glfw3 gl)
-LDFLAGS = $(shell pkg-config --libs gl glew glfw3) -fsanitize=undefined
+CFLAGS = -Wall -Wextra -O0 -g -I$(LIB_FOLDER)/include/ -I$(SRC_DIR)/include/ $(shell pkg-config --cflags glfw3 gl)
+LDFLAGS = $(shell pkg-config --libs gl glew glfw3)
 
 BUILD = build
 

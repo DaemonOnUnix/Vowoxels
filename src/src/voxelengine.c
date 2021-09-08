@@ -49,14 +49,17 @@ bool saveChunkToFile(Chunk* chunk, char* dir){
         // Write data
         if(!write(chunk_fd, &voxel_num, sizeof(int32_t))) {
             LOG_PANIC("Error to write voxel_num in chunk file '%s'", filename);
+            close(chunk_fd);
             return 0;
         }
         if(!write(chunk_fd, &voxel_type, sizeof(int32_t))) {
             LOG_PANIC("Error to write voxel_type in chunk file '%s'", filename);
+            close(chunk_fd);
             return 0;
         }
         if(!write(chunk_fd, &voxel_mask, sizeof(int32_t))) {
             LOG_PANIC("Error to write voxel_mask in chunk file '%s'", filename);
+            close(chunk_fd);
             return 0;
         }
     }
@@ -70,9 +73,6 @@ Chunk* loadChunkFromFile(char* dir, int32_t chunk_x, int32_t chunk_y, int32_t ch
     // Create filename
     smartstr pogstr filename = create_filename(dir, chunk_x, chunk_y, chunk_z);
 
-    // Allocate Chunk
-    Chunk* to_return = malloc(sizeof(Chunk));
-
     // Read Chunk
     int chunk_fd = open(filename, O_RDONLY);
     if(!chunk_fd) {
@@ -83,6 +83,9 @@ Chunk* loadChunkFromFile(char* dir, int32_t chunk_x, int32_t chunk_y, int32_t ch
     int32_t* data = (int32_t*) _data;
     close(chunk_fd);
 
+    // Allocate Chunk
+    Chunk* to_return = malloc(sizeof(Chunk));
+
     // Parse data
     size_t count = 0;
     size_t voxel_count = 0;
@@ -92,7 +95,7 @@ Chunk* loadChunkFromFile(char* dir, int32_t chunk_x, int32_t chunk_y, int32_t ch
         int32_t voxel_mask = data[i+2];
         count += num;
 
-        for(int32_t index = 0; index < num; index++) {
+        for(int32_t index = 0; index < num; index++, voxel_count++) {
             to_return->voxel_list[voxel_count] = voxel_type;
             to_return->voxel_mask[voxel_count] = (enum voxel_mask)voxel_mask;
         }

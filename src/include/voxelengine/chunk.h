@@ -31,6 +31,7 @@ typedef struct {
 
 unsigned char saveChunkToFile(Chunk* chunk, char* dir);
 char* create_filename(char* dir, int32_t chunk_x, int32_t chunk_y, int32_t chunk_z);
+Chunk* loadChunkFromFile(char* dir, int32_t chunk_x, int32_t chunk_y, int32_t chunk_z);
 
 
 #endif
