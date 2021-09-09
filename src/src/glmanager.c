@@ -4,6 +4,7 @@
 #include "collections/vector.h"
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
+#include "gl/manager.h"
 
 GLFWwindow* window;
 
@@ -12,12 +13,13 @@ GLFWwindow* glinit(){
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-    window = glfwCreateWindow(640, 480, "Playground", NULL, NULL);
+    window = glfwCreateWindow(SCREEN_WITH, SCREEN_HEIGHT, "Playground", NULL, NULL);
     qASSERT(window);
 	glfwMakeContextCurrent(window);
     glewExperimental = GL_TRUE; 
     ASSERT(!glewInit(), "Glew Init successful. (%s)", "Glew init failed with code %s", glewGetErrorString(glewInit()));
 	glfwSetWindowTitle(window, "Playground");
+	glEnable(GL_DEPTH_TEST);
     return window;
 }
 
@@ -26,12 +28,15 @@ void glend(){
 	glfwTerminate();
 }
 
-void bindShader(){
+unsigned int bindShader(){
     const char *vertexShaderSource = "#version 330 core\n"
     "layout (location = 0) in vec3 aPos;\n"
+	"uniform mat4 model;\n"
+	"uniform mat4 view;\n"
+	"uniform mat4 projection;\n"
     "void main()\n"
     "{\n"
-    "   gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);\n"
+    "   gl_Position = projection * view * model * vec4(aPos, 1.0);\n"
     "}\n";
 
 	unsigned int vertexShader;
@@ -77,4 +82,5 @@ void bindShader(){
 	qASSERT(success);
 
 	glUseProgram(shaderProgram);
+	return shaderProgram;
 }

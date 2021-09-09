@@ -3,8 +3,11 @@
 
 #include <GLFW/glfw3.h>
 
+#define SCREEN_WITH 	640
+#define SCREEN_HEIGHT 	480
+
 GLFWwindow* glinit();
 void glend();
-void bindShader();
+unsigned int bindShader();
 
 #endif

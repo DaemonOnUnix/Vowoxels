@@ -100,4 +100,12 @@ static inline float fast_cos(float x)
     return fast_sin(M_PI_2 + x);
 }
 
+static inline float to_degrees(float radians) {
+    return radians * (180.0f / M_PI);
+}
+
+static inline float to_radians(float degrees) {
+    return degrees * (M_PI / 180.0f);
+}
+
 #endif

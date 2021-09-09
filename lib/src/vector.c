@@ -2,7 +2,7 @@
 #include <stdlib.h>
 static void* zero_out(void* beginning, size_t len){
     char* converted = (char*)beginning;
-    while(len --> 0){
+    while(len-- > 0){
         converted[len] = 0;
     }
     return beginning;
