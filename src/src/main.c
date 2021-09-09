@@ -78,11 +78,11 @@ int main() {
 	test();
 
 	// Camera
-	// Vec3 cameraPos   = vec3$(0.0f, 0.0f,  3.0f);
-	// Vec3 cameraFront = vec3$(0.0f, 0.0f, -1.0f);
-	// Vec3 cameraUp    = vec3$(0.0f, 1.0f,  0.0f);
-	// float deltaTime = 0.0f; // Time between current frame and last frame
-	// float lastFrame = 0.0f; // Time of last frame
+	Vec3 cameraPos   = vec3$(0.0f, 0.0f,  3.0f);
+	Vec3 cameraFront = vec3$(0.0f, 0.0f, -1.0f);
+	Vec3 cameraUp    = vec3$(0.0f, 1.0f,  0.0f);
+	float deltaTime = 0.0f; // Time between current frame and last frame
+	float lastFrame = 0.0f; // Time of last frame
 
 
 
@@ -93,29 +93,29 @@ int main() {
 
 		glUseProgram(shader);
 
-		// float currentFrame = glfwGetTime();
-		// deltaTime = currentFrame - lastFrame;
-		// lastFrame = currentFrame;
+		float currentFrame = glfwGetTime();
+		deltaTime = currentFrame - lastFrame;
+		lastFrame = currentFrame;
 
-		// ProcessInput
-  		// float cameraSpeed = 2.5f * deltaTime;
-		// if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
-		// 	vec3_add(cameraPos, vec3_mul_val(cameraFront, cameraSpeed));
-		// if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
-		// 	vec3_sub(cameraPos, vec3_mul_val(cameraFront, cameraSpeed));
-		// if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
-		// 	vec3_sub(cameraPos, vec3_mul_val(vec3_unit(vec3_cross(cameraFront, cameraUp)), cameraSpeed));
-		// if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
-		// 	vec3_add(cameraPos, vec3_mul_val(vec3_unit(vec3_cross(cameraFront, cameraUp)), cameraSpeed));
-		// mat4_lookAt(cameraPos, vec3_sub(cameraPos, cameraFront), cameraUp);
+		//ProcessInput
+  		float cameraSpeed = 2.5f * deltaTime;
+		if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+			cameraPos = vec3_add(cameraPos, vec3_mul_val(cameraFront, cameraSpeed));
+		if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+			cameraPos = vec3_sub(cameraPos, vec3_mul_val(cameraFront, cameraSpeed));
+		if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
+			cameraPos = vec3_sub(cameraPos, vec3_mul_val(vec3_unit(vec3_cross(cameraFront, cameraUp)), cameraSpeed));
+		if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
+			cameraPos = vec3_add(cameraPos, vec3_mul_val(vec3_unit(vec3_cross(cameraFront, cameraUp)), cameraSpeed));
+		Mat4 view = mat4_lookAt(cameraPos, vec3_sub(cameraPos, cameraFront), cameraUp);
 		
 
 		// Le cube
 		Mat4 model = mat4_id(1.0f);
-		Mat4 view = mat4_id(1.0f);
-		Mat4 projection;
 		model = mat4_rotate(model, (float)glfwGetTime(), vec3$(0.5f, 1.0f, 0.0f));
-		view = mat4_translate(view, vec3$(0.0f, 0.0f, -3.0f));
+		//Mat4 view = mat4_id(1.0f);
+		//view = mat4_translate(view, vec3$(0.0f, 0.0f, -3.0f));
+		Mat4 projection;
 		projection = mat4_perspective(to_radians(45.0f), (float)SCREEN_WITH / (float)SCREEN_HEIGHT, 0.1f, 100.0f);
 		int modelLoc = glGetUniformLocation(shader, "model");
 		int viewLoc = glGetUniformLocation(shader, "view");
