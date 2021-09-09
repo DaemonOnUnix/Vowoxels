@@ -120,12 +120,9 @@ int main() {
 		int modelLoc = glGetUniformLocation(shader, "model");
 		int viewLoc = glGetUniformLocation(shader, "view");
 		int projectionLoc = glGetUniformLocation(shader, "projection");
-		float *mlist = mat4_to_list(model);
-		float *vlist = mat4_to_list(view);
-		float *plist = mat4_to_list(projection);
-		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, mlist);
-		glUniformMatrix4fv(viewLoc, 1, GL_FALSE, vlist);
-		glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, plist);
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, model.data);
+		glUniformMatrix4fv(viewLoc, 1, GL_FALSE, view.data);
+		glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, projection.data);
 
 		tests(window);
         glBindVertexArray(VAO);
@@ -134,9 +131,6 @@ int main() {
 
 		glfwSwapBuffers(window);
 		glfwPollEvents();
-		free(mlist);
-		free(vlist);
-		free(plist);
 	}
 
 	LOG_PANIC("End of program.");
