@@ -9,5 +9,7 @@
 GLFWwindow* glinit();
 void glend();
 unsigned int bindShader();
+void processInput(float deltaTime);
+void drawLoop(unsigned int VAO);
 
 #endif

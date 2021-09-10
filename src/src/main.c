@@ -15,11 +15,14 @@
 #include <GLFW/glfw3.h>
 
 #include "gl/manager.h"
+#include "gl/camera.h"
 
 #include "tests/testground.h"
 
 int main() {
-    GLFWwindow* window = glinit();
+    glinit();
+    initCamera(vec3$(0.0f, 0.0f,  3.0f), vec3$(0.0f, 0.0f, -1.0f), vec3$(0.0f, 1.0f,  0.0f));
+	bindShader();
 
 	float vertices[] = {
         -0.5f, -0.5f, -0.5f,
@@ -73,65 +76,10 @@ int main() {
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0); 
 
-	unsigned int shader = bindShader();
 
 	test();
 
-	// Camera
-	Vec3 cameraPos   = vec3$(0.0f, 0.0f,  3.0f);
-	Vec3 cameraFront = vec3$(0.0f, 0.0f, -1.0f);
-	Vec3 cameraUp    = vec3$(0.0f, 1.0f,  0.0f);
-	float deltaTime = 0.0f; // Time between current frame and last frame
-	float lastFrame = 0.0f; // Time of last frame
-
-
-
-	while (!glfwWindowShouldClose(window)){
-        glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-
-		glUseProgram(shader);
-
-		float currentFrame = glfwGetTime();
-		deltaTime = currentFrame - lastFrame;
-		lastFrame = currentFrame;
-
-		//ProcessInput
-  		float cameraSpeed = 2.5f * deltaTime;
-		if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
-			cameraPos = vec3_add(cameraPos, vec3_mul_val(cameraFront, cameraSpeed));
-		if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
-			cameraPos = vec3_sub(cameraPos, vec3_mul_val(cameraFront, cameraSpeed));
-		if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
-			cameraPos = vec3_sub(cameraPos, vec3_mul_val(vec3_unit(vec3_cross(cameraFront, cameraUp)), cameraSpeed));
-		if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
-			cameraPos = vec3_add(cameraPos, vec3_mul_val(vec3_unit(vec3_cross(cameraFront, cameraUp)), cameraSpeed));
-		Mat4 view = mat4_lookAt(cameraPos, vec3_sub(cameraPos, cameraFront), cameraUp);
-		
-
-		// Le cube
-		Mat4 model = mat4_id(1.0f);
-		model = mat4_rotate(model, (float)glfwGetTime(), vec3$(0.5f, 1.0f, 0.0f));
-		//Mat4 view = mat4_id(1.0f);
-		//view = mat4_translate(view, vec3$(0.0f, 0.0f, -3.0f));
-		Mat4 projection;
-		projection = mat4_perspective(to_radians(45.0f), (float)SCREEN_WITH / (float)SCREEN_HEIGHT, 0.1f, 100.0f);
-		int modelLoc = glGetUniformLocation(shader, "model");
-		int viewLoc = glGetUniformLocation(shader, "view");
-		int projectionLoc = glGetUniformLocation(shader, "projection");
-		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, model.data);
-		glUniformMatrix4fv(viewLoc, 1, GL_FALSE, view.data);
-		glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, projection.data);
-
-		tests(window);
-        glBindVertexArray(VAO);
-        glDrawArrays(GL_TRIANGLES, 0, 36);
-
-
-		glfwSwapBuffers(window);
-		glfwPollEvents();
-	}
+	drawLoop(VAO);
 
 	LOG_PANIC("End of program.");
 	glend();
