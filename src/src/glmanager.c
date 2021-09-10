@@ -44,20 +44,24 @@ void glend(){
 
 unsigned int bindShader(){
 	EngineData* data = getEngineData();
-    const char *vertexShaderSource = "#version 330 core\n"
+    const char *vertexShaderSource = "#version 420 core\n"
     "layout (location = 0) in vec3 aPos;\n"
+    "layout (location = 1) in vec2 textCoord;\n"
 	"uniform mat4 model;\n"
 	"uniform mat4 view;\n"
 	"uniform mat4 projection;\n"
+	"out vec2 TexCoord;"
     "void main()\n"
     "{\n"
     "   gl_Position = projection * view * model * vec4(aPos, 1.0);\n"
+	"	TexCoord = textCoord;\n"
     "}\n";
 
 	unsigned int vertexShader;
 	vertexShader = glCreateShader(GL_VERTEX_SHADER);
 
 	glShaderSource(vertexShader, 1, &vertexShaderSource, NULL);
+
 	glCompileShader(vertexShader);
 	int success = 0;
     char infoLog[512];
@@ -68,11 +72,13 @@ unsigned int bindShader(){
         LOG_PANIC("ERROR::SHADER::PROGRAM::LINKING_FAILED\t%s", infoLog);
     }
 
-	const char* fragmentShaderSource  = "#version 330 core\n"
+	const char* fragmentShaderSource  = "#version 420 core\n"
+	"uniform sampler2D sampler;\n"
 	"out vec4 FragColor;\n"
+	"in vec2 TexCoord;"
 	"void main()\n"
 	"{\n"
-	"    FragColor = vec4(1.0f, 0.5f, 0.2f, 1.0f);\n"
+	"    FragColor = texture2D(sampler, TexCoord);\n"
 	"}\n";
 
 	unsigned int fragmentShader;

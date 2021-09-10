@@ -19,6 +19,8 @@ struct Vertex {
     float x; 
     float y;
     float z;
+    float uv_x;
+    float uv_y;
 };
 
 typedef struct {
