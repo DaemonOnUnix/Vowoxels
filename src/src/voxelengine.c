@@ -1,4 +1,6 @@
 #include "voxelengine/chunk.h"
+#include "voxelengine/texture.h"
+#include "voxelengine/data.h"
 #include "collections/string.h"
 #include <stdlib.h>
 #include <unistd.h>
@@ -111,15 +113,6 @@ Chunk* loadChunkFromFile(char* dir, int32_t chunk_x, int32_t chunk_y, int32_t ch
     chunk->vertex_buffer[vertex_count].z = _z;\
     vertex_count++;
 
-#define SUMMIT_sde ((unsigned char)0b00000001)
-#define SUMMIT_nde ((unsigned char)0b00000010)
-#define SUMMIT_sdw ((unsigned char)0b00000100)
-#define SUMMIT_ndw ((unsigned char)0b00001000)
-#define SUMMIT_sue ((unsigned char)0b00010000)
-#define SUMMIT_nue ((unsigned char)0b00100000)
-#define SUMMIT_suw ((unsigned char)0b01000000)
-#define SUMMIT_nuw ((unsigned char)0b10000000)
-
 #define SUMMIT_u ((unsigned char)0b00000001)
 #define SUMMIT_d ((unsigned char)0b00000010)
 #define SUMMIT_n ((unsigned char)0b00000100)
@@ -137,164 +130,108 @@ void updateChunkVertex(Chunk* chunk){
                 if(chunk->voxel_list[INDEX_TO_CHUNK(x, y, z)] == 0){
                     continue;
                 }
-
-                char vertex_mask = 0;
-                char face_mask = 0;
-                char nb_vertex = 0;
-                char offset = 0;
-
                 // Check vertex need
                 if((x == 0 || !chunk->voxel_list[INDEX_TO_CHUNK(x-1, y, z)])){
-                    vertex_mask |= (SUMMIT_sue | SUMMIT_suw | SUMMIT_sde | SUMMIT_sdw);
-                    face_mask |= SUMMIT_s;
+                    VERTEX_BUFFER_E(x, y, z+1);
+                    VERTEX_BUFFER_E(x, y, z);
+                    VERTEX_BUFFER_E(x, y+1, z+1);
+                    VERTEX_BUFFER_E(x, y+1, z);
+                    // (0,1,1)
+                    chunk->triangles_buffer[triangles_count++] = vertex_count + 2 - 4;
+                    // (0,1,0)
+                    chunk->triangles_buffer[triangles_count++] = vertex_count + 3 - 4;
+                    // (0,0,1)
+                    chunk->triangles_buffer[triangles_count++] = vertex_count - 4;
+                    // (0,0,1)
+                    chunk->triangles_buffer[triangles_count++] = vertex_count - 4;
+                    // (0,1,0)
+                    chunk->triangles_buffer[triangles_count++] = vertex_count + 3 - 4;
+                    // (0,0,0)
+                    chunk->triangles_buffer[triangles_count++] = vertex_count + 1 - 4;
                 }
                 if((x == CHUNK_DIMENSION-1 || !chunk->voxel_list[INDEX_TO_CHUNK(x+1, y, z)])) {
-                    vertex_mask |= (SUMMIT_nue | SUMMIT_nuw | SUMMIT_nde | SUMMIT_ndw);
-                    face_mask |= SUMMIT_n;
+                    VERTEX_BUFFER_E(x+1, y+1, z+1);
+                    VERTEX_BUFFER_E(x+1, y, z+1);
+                    VERTEX_BUFFER_E(x+1, y, z);
+                    VERTEX_BUFFER_E(x+1, y+1, z);
+                    // (1,1,1)
+                    chunk->triangles_buffer[triangles_count++] = vertex_count + 3 - 4;
+                    // (1,0,1)
+                    chunk->triangles_buffer[triangles_count++] = vertex_count + 0 - 4;
+                    // (1,1,0)
+                    chunk->triangles_buffer[triangles_count++] = vertex_count + 2 - 4;
+                    // (1,1,0)
+                    chunk->triangles_buffer[triangles_count++] = vertex_count + 2 - 4;
+                    // (1,0,1)
+                    chunk->triangles_buffer[triangles_count++] = vertex_count + 0 - 4;
+                    // (1,0,0)
+                    chunk->triangles_buffer[triangles_count++] = vertex_count + 1 - 4;
                 }
                 if((y == 0 || !chunk->voxel_list[INDEX_TO_CHUNK(x, y-1, z)]) ){
-                    vertex_mask |= (SUMMIT_sdw | SUMMIT_sde | SUMMIT_ndw | SUMMIT_nde);
-                    face_mask |= SUMMIT_d;
+                    VERTEX_BUFFER_E(x, y, z+1);
+                    VERTEX_BUFFER_E(x+1, y, z+1);
+                    VERTEX_BUFFER_E(x, y, z);
+                    VERTEX_BUFFER_E(x+1, y, z);
+                    chunk->triangles_buffer[triangles_count++] = vertex_count-4+3;
+                    chunk->triangles_buffer[triangles_count++] = vertex_count-4+1;
+                    chunk->triangles_buffer[triangles_count++] = vertex_count-4+2;
+                    chunk->triangles_buffer[triangles_count++] = vertex_count-4+2;
+                    chunk->triangles_buffer[triangles_count++] = vertex_count-4+1;
+                    chunk->triangles_buffer[triangles_count++] = vertex_count-4;
                 }
                 if((y == CHUNK_DIMENSION-1 || !chunk->voxel_list[INDEX_TO_CHUNK(x, y+1, z)]) ){
-                    vertex_mask |= (SUMMIT_nue | SUMMIT_sue | SUMMIT_nuw | SUMMIT_suw);
-                    face_mask |= SUMMIT_u;
+                    VERTEX_BUFFER_E(x+1, y+1, z+1);
+                    VERTEX_BUFFER_E(x, y+1, z+1);
+                    VERTEX_BUFFER_E(x, y+1, z);
+                    VERTEX_BUFFER_E(x+1, y+1, z);
+                    // (1,1,0)
+                    chunk->triangles_buffer[triangles_count++] = vertex_count + 3 - 4;
+                    // (0,1,0)
+                    chunk->triangles_buffer[triangles_count++] = vertex_count + 1 - 4;
+                    // (1,1,1)
+                    chunk->triangles_buffer[triangles_count++] = vertex_count + 2 - 4;
+                    // (1,1,1)
+                    chunk->triangles_buffer[triangles_count++] = vertex_count + 3 - 4;
+                    // (0,1,0)
+                    chunk->triangles_buffer[triangles_count++] = vertex_count + 1 - 4;
+                    // (0,1,1)
+                    chunk->triangles_buffer[triangles_count++] = vertex_count + 0 - 4;
                 }
                 if((z == 0 || !chunk->voxel_list[INDEX_TO_CHUNK(x, y, z-1)])){
-                    vertex_mask |= (SUMMIT_ndw | SUMMIT_sdw | SUMMIT_nuw | SUMMIT_suw);
-                    face_mask |= SUMMIT_w;
+                    VERTEX_BUFFER_E(x, y, z);
+                    VERTEX_BUFFER_E(x+1, y, z);
+                    VERTEX_BUFFER_E(x, y+1, z);
+                    VERTEX_BUFFER_E(x+1, y+1, z);
+                    // (0,1,0)
+                    chunk->triangles_buffer[triangles_count++] = vertex_count + 2 - 4;
+                    // (1,1,0)
+                    chunk->triangles_buffer[triangles_count++] = vertex_count + 3 - 4;
+                    // (0,0,0)
+                    chunk->triangles_buffer[triangles_count++] = vertex_count - 4;
+                    // (0,0,0)
+                    chunk->triangles_buffer[triangles_count++] = vertex_count - 4;
+                    // (1,1,0)
+                    chunk->triangles_buffer[triangles_count++] = vertex_count + 3 - 4;
+                    // (1,0,0)
+                    chunk->triangles_buffer[triangles_count++] = vertex_count + 1 - 4;
                 }
                 if((z == CHUNK_DIMENSION-1 || !chunk->voxel_list[INDEX_TO_CHUNK(x, y, z+1)])){
-                    vertex_mask |= (SUMMIT_nde | SUMMIT_sde | SUMMIT_nue | SUMMIT_sue);
-                    face_mask |= SUMMIT_e;
-                }
-
-                // Add vertex to buffer
-                if(vertex_mask & SUMMIT_sde){ // I
                     VERTEX_BUFFER_E(x, y, z+1);
-                    nb_vertex++;
-                }
-                if(vertex_mask & SUMMIT_nde){
                     VERTEX_BUFFER_E(x+1, y, z+1);
-                    nb_vertex++;
-                }
-                if(vertex_mask & SUMMIT_sdw){ // I
-                    VERTEX_BUFFER_E(x, y, z);
-                    nb_vertex++;
-                }
-                if(vertex_mask & SUMMIT_ndw){
-                    VERTEX_BUFFER_E(x+1, y, z);
-                    nb_vertex++;
-                }
-                if(vertex_mask & SUMMIT_sue){ // I
                     VERTEX_BUFFER_E(x, y+1, z+1);
-                    nb_vertex++;
-                }
-                if(vertex_mask & SUMMIT_suw){ // I
-                    VERTEX_BUFFER_E(x, y+1, z);
-                    nb_vertex++;
-                }
-                if(vertex_mask & SUMMIT_nuw){
-                    VERTEX_BUFFER_E(x+1, y+1, z);
-                    nb_vertex++;
-                }
-                if(vertex_mask & SUMMIT_nue){
                     VERTEX_BUFFER_E(x+1, y+1, z+1);
-                    nb_vertex++;
-                }
-                
-                // Add triangles to buffer
-                if(face_mask & SUMMIT_d){
-                    chunk->triangles_buffer[triangles_count++] = vertex_count-nb_vertex+3;
-                    chunk->triangles_buffer[triangles_count++] = vertex_count-nb_vertex+1;
-                    chunk->triangles_buffer[triangles_count++] = vertex_count-nb_vertex+2;
-                    chunk->triangles_buffer[triangles_count++] = vertex_count-nb_vertex+2;
-                    chunk->triangles_buffer[triangles_count++] = vertex_count-nb_vertex+1;
-                    chunk->triangles_buffer[triangles_count++] = vertex_count-nb_vertex;
-                }
-                if(face_mask & SUMMIT_e){
                     // (0,1,1)
-                    offset = ((vertex_mask & SUMMIT_sdw) >> 2) + ((vertex_mask & SUMMIT_ndw) >> 3);
-                    chunk->triangles_buffer[triangles_count++] = vertex_count - nb_vertex + 2 + offset;
+                    chunk->triangles_buffer[triangles_count++] = vertex_count + 2 - 4;
                     // (0,0,1)
-                    chunk->triangles_buffer[triangles_count++] = vertex_count - nb_vertex;
+                    chunk->triangles_buffer[triangles_count++] = vertex_count - 4;
                     // (1,1,1)
-                    offset = ((vertex_mask & SUMMIT_sdw) >> 2) + ((vertex_mask & SUMMIT_ndw) >> 3) + ((vertex_mask & SUMMIT_suw) >> 6) + ((vertex_mask & SUMMIT_nuw) >> 7);
-                    chunk->triangles_buffer[triangles_count++] = vertex_count - nb_vertex + 3 + offset;
+                    chunk->triangles_buffer[triangles_count++] = vertex_count + 3 - 4;
                     // (1,1,1)
-                    chunk->triangles_buffer[triangles_count++] = vertex_count - nb_vertex + 3 + offset;
+                    chunk->triangles_buffer[triangles_count++] = vertex_count + 3 - 4;
                     // (0,0,1)
-                    chunk->triangles_buffer[triangles_count++] = vertex_count - nb_vertex;
+                    chunk->triangles_buffer[triangles_count++] = vertex_count - 4;
                     // (1,0,1)
-                    chunk->triangles_buffer[triangles_count++] = vertex_count - nb_vertex + 1;
-                }
-                if(face_mask & SUMMIT_w){
-                    // (0,1,0)
-                    offset = (vertex_mask & SUMMIT_sde) + ((vertex_mask & SUMMIT_nde) >> 1) + ((vertex_mask & SUMMIT_sue) >> 4);
-                    chunk->triangles_buffer[triangles_count++] = vertex_count - nb_vertex + 2 + offset;
-                    // (1,1,0)
-                    chunk->triangles_buffer[triangles_count++] = vertex_count - nb_vertex + 3 + offset;
-                    // (0,0,0)
-                    offset = (vertex_mask & SUMMIT_sde) + ((vertex_mask & SUMMIT_nde) >> 1);
-                    chunk->triangles_buffer[triangles_count++] = vertex_count - nb_vertex + offset;
-                    // (0,0,0)
-                    chunk->triangles_buffer[triangles_count++] = vertex_count - nb_vertex + offset;
-                    // (1,1,0)
-                    offset = (vertex_mask & SUMMIT_sde) + ((vertex_mask & SUMMIT_nde) >> 1) + ((vertex_mask & SUMMIT_sue) >> 4);
-                    chunk->triangles_buffer[triangles_count++] = vertex_count - nb_vertex + 3 + offset;
-                    // (1,0,0)
-                    offset = (vertex_mask & SUMMIT_sde) + ((vertex_mask & SUMMIT_nde) >> 1);
-                    chunk->triangles_buffer[triangles_count++] = vertex_count - nb_vertex + 1 + offset;
-                }
-                if(face_mask & SUMMIT_u){
-                    // (1,1,0)
-                    offset = (vertex_mask & SUMMIT_sde) + ((vertex_mask & SUMMIT_nde) >> 1) + ((vertex_mask & SUMMIT_sdw) >> 2) + ((vertex_mask & SUMMIT_ndw) >> 3);
-                    chunk->triangles_buffer[triangles_count++] = vertex_count - nb_vertex + 3 + offset;
-                    // (0,1,0)
-                    chunk->triangles_buffer[triangles_count++] = vertex_count - nb_vertex + 1 + offset;
-                    // (1,1,1)
-                    chunk->triangles_buffer[triangles_count++] = vertex_count - nb_vertex + 2 + offset;
-                    // (1,1,1)
-                    chunk->triangles_buffer[triangles_count++] = vertex_count - nb_vertex + 3 + offset;
-                    // (0,1,0)
-                    chunk->triangles_buffer[triangles_count++] = vertex_count - nb_vertex + 1 + offset;
-                    // (0,1,1)
-                    chunk->triangles_buffer[triangles_count++] = vertex_count - nb_vertex + 0 + offset;
-                }
-                if(face_mask & SUMMIT_n){
-                    // (1,1,1)
-                    offset = (vertex_mask & SUMMIT_sde) + ((vertex_mask & SUMMIT_sdw) >> 2) + ((vertex_mask & SUMMIT_sue) >> 4) + ((vertex_mask & SUMMIT_suw) >> 6);
-                    chunk->triangles_buffer[triangles_count++] = vertex_count - nb_vertex + 3 + offset;
-                    // (1,0,1)
-                    offset = (vertex_mask & SUMMIT_sde);
-                    chunk->triangles_buffer[triangles_count++] = vertex_count - nb_vertex + 0 + offset;
-                    // (1,1,0)
-                    offset = (vertex_mask & SUMMIT_sde) + ((vertex_mask & SUMMIT_sdw) >> 2) + ((vertex_mask & SUMMIT_sue) >> 4) + ((vertex_mask & SUMMIT_suw) >> 6);
-                    chunk->triangles_buffer[triangles_count++] = vertex_count - nb_vertex + 2 + offset;
-                    // (1,1,0)
-                    chunk->triangles_buffer[triangles_count++] = vertex_count - nb_vertex + 2 + offset;
-                    // (1,0,1)
-                    offset = (vertex_mask & SUMMIT_sde);
-                    chunk->triangles_buffer[triangles_count++] = vertex_count - nb_vertex + 0 + offset;
-                    // (1,0,0)
-                    offset = (vertex_mask & SUMMIT_sde) + ((vertex_mask & SUMMIT_sdw) >> 2);
-                    chunk->triangles_buffer[triangles_count++] = vertex_count - nb_vertex + 1 + offset;
-                }
-                if(face_mask & SUMMIT_s){
-                    // (0,1,1)
-                    offset = ((vertex_mask & SUMMIT_nde) >> 1) + ((vertex_mask & SUMMIT_ndw) >> 3);
-                    chunk->triangles_buffer[triangles_count++] = vertex_count - nb_vertex + 2 + offset;
-                    // (0,1,0)
-                    chunk->triangles_buffer[triangles_count++] = vertex_count - nb_vertex + 3 + offset;
-                    // (0,0,1)
-                    chunk->triangles_buffer[triangles_count++] = vertex_count - nb_vertex;
-                    // (0,0,1)
-                    chunk->triangles_buffer[triangles_count++] = vertex_count - nb_vertex;
-                    // (0,1,0)
-                    chunk->triangles_buffer[triangles_count++] = vertex_count - nb_vertex + 3 + offset;
-                    // (0,0,0)
-                    offset = ((vertex_mask & SUMMIT_nde) >> 1);
-                    chunk->triangles_buffer[triangles_count++] = vertex_count - nb_vertex + 1 + offset;
+                    chunk->triangles_buffer[triangles_count++] = vertex_count + 1 - 4;
                 }
             }
         }
@@ -303,4 +240,16 @@ void updateChunkVertex(Chunk* chunk){
     chunk->triangles_count = triangles_count;
     LOG_INFO("Vertex count : %lu", chunk->vertex_count);
     LOG_INFO("Triangles count : %lu", chunk->triangles_count/3);
+}
+
+unsigned int createAtlas(Texture* texture, uint8_t tiles_x,  uint8_t tiles_y){
+    EngineData* data = getEngineData();
+    unsigned int atlasIndex = 0;
+    struct Atlas* atlas = data->atlas;
+    for (; atlas->next != NULL; atlas->next, atlasIndex++);
+    atlas->next = malloc(sizeof(struct Atlas));
+    atlas->next->texture = texture;
+    atlas->next->tilex = tiles_x;
+    atlas->next->tiley = tiles_y;
+    return atlasIndex;
 }

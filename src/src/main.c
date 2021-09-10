@@ -20,10 +20,15 @@
 
 #include "tests/testground.h"
 
+#include "voxelengine/data.h"
+EngineData* data;
+
 int main() {
+    data = malloc(sizeof(data));
+    data->atlas = calloc(1, sizeof(struct Atlas));
     glinit();
-    initCamera(vec3$(0.0f, 0.0f,  3.0f), vec3$(0.0f, 0.0f, -1.0f), vec3$(0.0f, 1.0f,  0.0f));
-	bindShader();
+    data->camera = initCamera(vec3$(0.0f, 0.0f,  3.0f), vec3$(0.0f, 0.0f, -1.0f), vec3$(0.0f, 1.0f,  0.0f));
+	data->shaderProgram = bindShader();
 
     // TEST CHUNK
 	Chunk* chunk = calloc(1, sizeof(Chunk));

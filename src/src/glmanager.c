@@ -9,11 +9,9 @@
 #include "linear_algebra/vec3.h"
 #include "linear_algebra/mat4.h"
 
+#include "voxelengine/data.h"
 #include "tests/testground.h"
 
-GLFWwindow* window;
-Camera* cam;
-unsigned int shaderProgram;
 bool viewMode = false;
 bool firstMouse = true;
 float lastX = 400;
@@ -22,28 +20,30 @@ float yaw;
 float pitch;
 
 GLFWwindow* glinit(){
+	EngineData* data = getEngineData();
     qASSERT(glfwInit());
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-    window = glfwCreateWindow(SCREEN_WITH, SCREEN_HEIGHT, "Playground", NULL, NULL);
-    qASSERT(window);
-	glfwMakeContextCurrent(window);
+    data->window = glfwCreateWindow(SCREEN_WITH, SCREEN_HEIGHT, "Playground", NULL, NULL);
+    qASSERT(data->window);
+	glfwMakeContextCurrent(data->window);
     glewExperimental = GL_TRUE; 
     ASSERT(!glewInit(), "Glew Init successful. (%s)", "Glew init failed with code %s", glewGetErrorString(glewInit()));
-	glfwSetWindowTitle(window, "Playground");
+	glfwSetWindowTitle(data->window, "Playground");
 	glEnable(GL_DEPTH_TEST);
-	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-	glfwSetCursorPosCallback(window, mouse_callback);
-    return window;
+	//glfwSetInputMode(data->window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+	glfwSetCursorPosCallback(data->window, mouse_callback);
+    return data->window;
 }
 
 void glend(){
-    glfwDestroyWindow(window);
+    glfwDestroyWindow(getEngineData()->window);
 	glfwTerminate();
 }
 
 unsigned int bindShader(){
+	EngineData* data = getEngineData();
     const char *vertexShaderSource = "#version 330 core\n"
     "layout (location = 0) in vec3 aPos;\n"
 	"uniform mat4 model;\n"
@@ -86,22 +86,22 @@ unsigned int bindShader(){
         LOG_PANIC("ERROR::SHADER::PROGRAM::LINKING_FAILED\t%s", infoLog);
     }
 
-	shaderProgram = glCreateProgram();
+	data->shaderProgram = glCreateProgram();
 
-	glAttachShader(shaderProgram, vertexShader);
-	glAttachShader(shaderProgram, fragmentShader);
-	glLinkProgram(shaderProgram);
+	glAttachShader(data->shaderProgram, vertexShader);
+	glAttachShader(data->shaderProgram, fragmentShader);
+	glLinkProgram(data->shaderProgram);
 
 
-    glGetProgramiv(shaderProgram, GL_LINK_STATUS, &success);
+    glGetProgramiv(data->shaderProgram, GL_LINK_STATUS, &success);
 	qASSERT(success);
 
-	glUseProgram(shaderProgram);
-	return shaderProgram;
+	glUseProgram(data->shaderProgram);
+	return data->shaderProgram;
 }
 
 Camera* initCamera(Vec3 cameraPos, Vec3 cameraFront, Vec3 cameraUp){
-	cam = malloc(sizeof(Camera));
+	Camera* cam = malloc(sizeof(Camera));
 	cam->cameraPos   = cameraPos;
 	cam->cameraFront = cameraFront;
 	cam->cameraUp    = cameraUp;
@@ -110,17 +110,18 @@ Camera* initCamera(Vec3 cameraPos, Vec3 cameraFront, Vec3 cameraUp){
 }
 
 void processInput(float deltaTime){
+	EngineData* data = getEngineData();
 	// Camera
-	float cameraSpeed = cam->cameraSpeed * deltaTime;
-	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
-		cam->cameraPos = vec3_add(cam->cameraPos, vec3_mul_val(cam->cameraFront, cameraSpeed));
-	if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
-		cam->cameraPos = vec3_sub(cam->cameraPos, vec3_mul_val(cam->cameraFront, cameraSpeed));
-	if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
-		cam->cameraPos = vec3_sub(cam->cameraPos, vec3_mul_val(vec3_unit(vec3_cross(cam->cameraFront, cam->cameraUp)), cameraSpeed));
-	if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
-		cam->cameraPos = vec3_add(cam->cameraPos, vec3_mul_val(vec3_unit(vec3_cross(cam->cameraFront, cam->cameraUp)), cameraSpeed));
-	if (glfwGetKey(window, GLFW_KEY_P) == GLFW_PRESS){
+	float cameraSpeed = data->camera->cameraSpeed * deltaTime;
+	if (glfwGetKey(data->window, GLFW_KEY_W) == GLFW_PRESS)
+		data->camera->cameraPos = vec3_add(data->camera->cameraPos, vec3_mul_val(data->camera->cameraFront, cameraSpeed));
+	if (glfwGetKey(data->window, GLFW_KEY_S) == GLFW_PRESS)
+		data->camera->cameraPos = vec3_sub(data->camera->cameraPos, vec3_mul_val(data->camera->cameraFront, cameraSpeed));
+	if (glfwGetKey(data->window, GLFW_KEY_A) == GLFW_PRESS)
+		data->camera->cameraPos = vec3_sub(data->camera->cameraPos, vec3_mul_val(vec3_unit(vec3_cross(data->camera->cameraFront, data->camera->cameraUp)), cameraSpeed));
+	if (glfwGetKey(data->window, GLFW_KEY_D) == GLFW_PRESS)
+		data->camera->cameraPos = vec3_add(data->camera->cameraPos, vec3_mul_val(vec3_unit(vec3_cross(data->camera->cameraFront, data->camera->cameraUp)), cameraSpeed));
+	if (glfwGetKey(data->window, GLFW_KEY_P) == GLFW_PRESS){
 		if (viewMode) {
 			glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 			viewMode = !viewMode;
@@ -134,15 +135,17 @@ void processInput(float deltaTime){
 }
 
 void drawLoop(unsigned int VAO, Chunk* chunk){
+	EngineData* data = getEngineData();
+
 	float deltaTime = 0.0f; // Time between current frame and last frame
 	float lastFrame = 0.0f; // Time of last frame
 
-	while (!glfwWindowShouldClose(window)){
+	while (!glfwWindowShouldClose(data->window)){
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 
-		glUseProgram(shaderProgram);
+		glUseProgram(data->shaderProgram);
 
 		float currentFrame = glfwGetTime();
 		deltaTime = currentFrame - lastFrame;
@@ -153,30 +156,31 @@ void drawLoop(unsigned int VAO, Chunk* chunk){
 		
 
 		// Le cube
-        Mat4 view = mat4_lookAt(cam->cameraPos, vec3_sub(cam->cameraPos, cam->cameraFront), cam->cameraUp);
+        Mat4 view = mat4_lookAt(data->camera->cameraPos, vec3_sub(data->camera->cameraPos, data->camera->cameraFront), data->camera->cameraUp);
 		Mat4 model = mat4_id(1.0f);
 		model = mat4_rotate(model, (float)glfwGetTime(), vec3$(0.5f, 1.0f, 0.0f));
 		Mat4 projection;
 		projection = mat4_perspective(to_radians(45.0f), (float)SCREEN_WITH / (float)SCREEN_HEIGHT, 0.1f, 100.0f);
-		int modelLoc = glGetUniformLocation(shaderProgram, "model");
-		int viewLoc = glGetUniformLocation(shaderProgram, "view");
-		int projectionLoc = glGetUniformLocation(shaderProgram, "projection");
+		int modelLoc = glGetUniformLocation(data->shaderProgram, "model");
+		int viewLoc = glGetUniformLocation(data->shaderProgram, "view");
+		int projectionLoc = glGetUniformLocation(data->shaderProgram, "projection");
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, model.data);
 		glUniformMatrix4fv(viewLoc, 1, GL_FALSE, view.data);
 		glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, projection.data);
 
-		tests(window);
+		tests(data->window);
 		
         glBindVertexArray(VAO);
         glDrawElements(GL_TRIANGLES, chunk->triangles_count, GL_UNSIGNED_INT, (void*)0);
 
-		glfwSwapBuffers(window);
+		glfwSwapBuffers(data->window);
 		glfwPollEvents();
 	}
 }
 
 
 void mouse_callback(GLFWwindow* window, double xpos, double ypos){
+	UNUSED(window);
 	if(firstMouse)
     {
         lastX = xpos;
@@ -202,5 +206,5 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos){
 		pitch = -89.0f;
 
 	Vec3 front = vec3$(cos(to_radians(pitch)) * cos(to_radians(yaw)), sin(to_radians(pitch)), cos(to_radians(pitch)) * sin(to_radians(yaw)));
-	cam->cameraFront = vec3_unit(front);
+	getEngineData()->camera->cameraFront = vec3_unit(front);
 }

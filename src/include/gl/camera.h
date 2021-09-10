@@ -2,6 +2,7 @@
 #define OPENGL_CAMERA_H
 
 #include "linear_algebra/vec3.h"
+#include <GLFW/glfw3.h>
 
 typedef struct
 {
