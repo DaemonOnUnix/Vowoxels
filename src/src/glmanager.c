@@ -84,6 +84,7 @@ unsigned int bindShader(){
 	glAttachShader(shaderProgram, fragmentShader);
 	glLinkProgram(shaderProgram);
 
+
     glGetProgramiv(shaderProgram, GL_LINK_STATUS, &success);
 	qASSERT(success);
 
@@ -113,7 +114,7 @@ void processInput(float deltaTime){
 		cam->cameraPos = vec3_add(cam->cameraPos, vec3_mul_val(vec3_unit(vec3_cross(cam->cameraFront, cam->cameraUp)), cameraSpeed));
 }
 
-void drawLoop(unsigned int VAO){
+void drawLoop(unsigned int VAO, Chunk* chunk){
 	float deltaTime = 0.0f; // Time between current frame and last frame
 	float lastFrame = 0.0f; // Time of last frame
 
@@ -148,9 +149,9 @@ void drawLoop(unsigned int VAO){
 		glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, projection.data);
 
 		tests(window);
+		
         glBindVertexArray(VAO);
-        glDrawArrays(GL_TRIANGLES, 0, 36);
-
+        glDrawElements(GL_TRIANGLES, chunk->triangles_count, GL_UNSIGNED_INT, (void*)0);
 
 		glfwSwapBuffers(window);
 		glfwPollEvents();

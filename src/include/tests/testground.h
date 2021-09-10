@@ -3,6 +3,6 @@
 
 void tests(void*);
 
-void test();
+unsigned int test();
 
 #endif

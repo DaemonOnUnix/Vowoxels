@@ -16,6 +16,7 @@
 
 #include "gl/manager.h"
 #include "gl/camera.h"
+#include "voxelengine/chunk.h"
 
 #include "tests/testground.h"
 
@@ -62,24 +63,37 @@ int main() {
         -0.5f,  0.5f,  0.5f,
         -0.5f,  0.5f, -0.5f
 	};
-	unsigned int VBO, VAO;
+    unsigned int triangle[] = {
+        0,1,2,0,1,2
+    };
+
+	//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+
+    // TEST CHUNK
+	Chunk* chunk = calloc(1, sizeof(Chunk));
+    chunk->voxel_list[0] = 1;
+    chunk->voxel_list[1] = 1;
+    updateChunkVertex(chunk);
+
+	unsigned int VBO, VAO, IBO;
     glGenVertexArrays(1, &VAO);
-    glGenBuffers(1, &VBO);
     glBindVertexArray(VAO);
+    glGenBuffers(1, &VBO);
+    glGenBuffers(1, &IBO);
 
+
+    // Vertex buffer
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-
+    glBufferData(GL_ARRAY_BUFFER, sizeof(struct Vertex) * chunk->vertex_count, chunk->vertex_buffer, GL_STATIC_DRAW);
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
 
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-    glBindVertexArray(0); 
+    // Index buffer
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, IBO);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned int) * chunk->triangles_count, chunk->triangles_buffer, GL_STATIC_DRAW);
 
-
-	test();
-
-	drawLoop(VAO);
+    glBindVertexArray(VAO);
+	drawLoop(VAO, chunk);
 
 	LOG_PANIC("End of program.");
 	glend();

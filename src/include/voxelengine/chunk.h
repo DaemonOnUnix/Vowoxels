@@ -32,7 +32,7 @@ typedef struct {
     struct Vertex vertex_buffer[4*6*CHUNK_NUM_VOXEL];
     int64_t vertex_count;
 
-    int triangles_buffer[6*6*CHUNK_NUM_VOXEL];
+    unsigned int triangles_buffer[6*6*CHUNK_NUM_VOXEL];
     int64_t triangles_count;
 } Chunk;
 
