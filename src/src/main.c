@@ -28,6 +28,8 @@ int main() {
     // TEST CHUNK
 	Chunk* chunk = calloc(1, sizeof(Chunk));
     chunk->voxel_list[0] = 1;
+    chunk->voxel_list[1] = 1;
+    chunk->voxel_list[3] = 1;
     updateChunkVertex(chunk);
 
 	unsigned int VBO, VAO, IBO;

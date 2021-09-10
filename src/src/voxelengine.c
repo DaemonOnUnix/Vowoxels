@@ -170,7 +170,7 @@ void updateChunkVertex(Chunk* chunk){
                 }
 
                 // Add vertex to buffer
-                if(vertex_mask & SUMMIT_sde){
+                if(vertex_mask & SUMMIT_sde){ // I
                     VERTEX_BUFFER_E(x, y, z+1);
                     nb_vertex++;
                 }
@@ -178,7 +178,7 @@ void updateChunkVertex(Chunk* chunk){
                     VERTEX_BUFFER_E(x+1, y, z+1);
                     nb_vertex++;
                 }
-                if(vertex_mask & SUMMIT_sdw){
+                if(vertex_mask & SUMMIT_sdw){ // I
                     VERTEX_BUFFER_E(x, y, z);
                     nb_vertex++;
                 }
@@ -186,11 +186,11 @@ void updateChunkVertex(Chunk* chunk){
                     VERTEX_BUFFER_E(x+1, y, z);
                     nb_vertex++;
                 }
-                if(vertex_mask & SUMMIT_sue){
+                if(vertex_mask & SUMMIT_sue){ // I
                     VERTEX_BUFFER_E(x, y+1, z+1);
                     nb_vertex++;
                 }
-                if(vertex_mask & SUMMIT_suw){
+                if(vertex_mask & SUMMIT_suw){ // I
                     VERTEX_BUFFER_E(x, y+1, z);
                     nb_vertex++;
                 }
@@ -222,7 +222,6 @@ void updateChunkVertex(Chunk* chunk){
                     offset = ((vertex_mask & SUMMIT_sdw) >> 2) + ((vertex_mask & SUMMIT_ndw) >> 3) + ((vertex_mask & SUMMIT_suw) >> 6) + ((vertex_mask & SUMMIT_nuw) >> 7);
                     chunk->triangles_buffer[triangles_count++] = vertex_count - nb_vertex + 3 + offset;
                     // (1,1,1)
-                    offset = ((vertex_mask & SUMMIT_sdw) >> 2) + ((vertex_mask & SUMMIT_ndw) >> 3);
                     chunk->triangles_buffer[triangles_count++] = vertex_count - nb_vertex + 3 + offset;
                     // (0,0,1)
                     chunk->triangles_buffer[triangles_count++] = vertex_count - nb_vertex;
@@ -256,7 +255,7 @@ void updateChunkVertex(Chunk* chunk){
                     // (1,1,1)
                     chunk->triangles_buffer[triangles_count++] = vertex_count - nb_vertex + 2 + offset;
                     // (1,1,1)
-                    chunk->triangles_buffer[triangles_count++] = vertex_count - nb_vertex + 2 + offset;
+                    chunk->triangles_buffer[triangles_count++] = vertex_count - nb_vertex + 3 + offset;
                     // (0,1,0)
                     chunk->triangles_buffer[triangles_count++] = vertex_count - nb_vertex + 1 + offset;
                     // (0,1,1)
@@ -283,17 +282,15 @@ void updateChunkVertex(Chunk* chunk){
                 }
                 if(face_mask & SUMMIT_s){
                     // (0,1,1)
-                    offset = ((vertex_mask & SUMMIT_nde) >> 1);
+                    offset = ((vertex_mask & SUMMIT_nde) >> 1) + ((vertex_mask & SUMMIT_ndw) >> 3);
                     chunk->triangles_buffer[triangles_count++] = vertex_count - nb_vertex + 2 + offset;
                     // (0,1,0)
-                    offset = ((vertex_mask & SUMMIT_nde) >> 1) + ((vertex_mask & SUMMIT_ndw) >> 3);
                     chunk->triangles_buffer[triangles_count++] = vertex_count - nb_vertex + 3 + offset;
                     // (0,0,1)
-                    chunk->triangles_buffer[triangles_count++] = vertex_count - nb_vertex + 0 + offset;
+                    chunk->triangles_buffer[triangles_count++] = vertex_count - nb_vertex;
                     // (0,0,1)
-                    chunk->triangles_buffer[triangles_count++] = vertex_count - nb_vertex + 0 + offset;
+                    chunk->triangles_buffer[triangles_count++] = vertex_count - nb_vertex;
                     // (0,1,0)
-                    offset = ((vertex_mask & SUMMIT_nde) >> 1) + ((vertex_mask & SUMMIT_ndw) >> 3);
                     chunk->triangles_buffer[triangles_count++] = vertex_count - nb_vertex + 3 + offset;
                     // (0,0,0)
                     offset = ((vertex_mask & SUMMIT_nde) >> 1);
@@ -305,5 +302,5 @@ void updateChunkVertex(Chunk* chunk){
     chunk->vertex_count = vertex_count;
     chunk->triangles_count = triangles_count;
     LOG_INFO("Vertex count : %lu", chunk->vertex_count);
-    LOG_INFO("Triangles count : %lu", chunk->triangles_count);
+    LOG_INFO("Triangles count : %lu", chunk->triangles_count/3);
 }
