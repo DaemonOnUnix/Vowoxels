@@ -13,5 +13,6 @@ typedef struct
 } Camera;
 
 Camera* initCamera(Vec3 cameraPos, Vec3 cameraFront, Vec3 cameraUp);
+void mouse_callback(GLFWwindow* window, double xpos, double ypos);
 
 #endif

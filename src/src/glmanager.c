@@ -15,6 +15,11 @@ GLFWwindow* window;
 Camera* cam;
 unsigned int shaderProgram;
 bool viewMode = false;
+bool firstMouse = true;
+float lastX = 400;
+float lastY = 300;
+float yaw;
+float pitch;
 
 GLFWwindow* glinit(){
     qASSERT(glfwInit());
@@ -28,6 +33,8 @@ GLFWwindow* glinit(){
     ASSERT(!glewInit(), "Glew Init successful. (%s)", "Glew init failed with code %s", glewGetErrorString(glewInit()));
 	glfwSetWindowTitle(window, "Playground");
 	glEnable(GL_DEPTH_TEST);
+	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+	glfwSetCursorPosCallback(window, mouse_callback);
     return window;
 }
 
@@ -166,4 +173,34 @@ void drawLoop(unsigned int VAO, Chunk* chunk){
 		glfwSwapBuffers(window);
 		glfwPollEvents();
 	}
+}
+
+
+void mouse_callback(GLFWwindow* window, double xpos, double ypos){
+	if(firstMouse)
+    {
+        lastX = xpos;
+        lastY = ypos;
+        firstMouse = false;
+    }
+
+	float xoffset = xpos - lastX;
+	float yoffset = lastY - ypos; // il faut inverser car ypos est donné de haut en bas
+	lastX = xpos;
+	lastY = ypos;
+
+	float sensitivity = 0.05f;
+	xoffset *= sensitivity;
+	yoffset *= sensitivity;
+
+	yaw   += xoffset;
+	pitch += yoffset;
+
+	if(pitch > 89.0f)
+		pitch =  89.0f;
+	if(pitch < -89.0f)
+		pitch = -89.0f;
+
+	Vec3 front = vec3$(cos(to_radians(pitch)) * cos(to_radians(yaw)), sin(to_radians(pitch)), cos(to_radians(pitch)) * sin(to_radians(yaw)));
+	cam->cameraFront = vec3_unit(front);
 }
