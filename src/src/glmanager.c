@@ -14,6 +14,7 @@
 GLFWwindow* window;
 Camera* cam;
 unsigned int shaderProgram;
+bool viewMode = false;
 
 GLFWwindow* glinit(){
     qASSERT(glfwInit());
@@ -112,6 +113,17 @@ void processInput(float deltaTime){
 		cam->cameraPos = vec3_sub(cam->cameraPos, vec3_mul_val(vec3_unit(vec3_cross(cam->cameraFront, cam->cameraUp)), cameraSpeed));
 	if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
 		cam->cameraPos = vec3_add(cam->cameraPos, vec3_mul_val(vec3_unit(vec3_cross(cam->cameraFront, cam->cameraUp)), cameraSpeed));
+	if (glfwGetKey(window, GLFW_KEY_P) == GLFW_PRESS){
+		if (viewMode) {
+			glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+			viewMode = !viewMode;
+		}
+		else{
+			glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+			viewMode = !viewMode;
+		}
+	}
+		
 }
 
 void drawLoop(unsigned int VAO, Chunk* chunk){
@@ -137,8 +149,6 @@ void drawLoop(unsigned int VAO, Chunk* chunk){
         Mat4 view = mat4_lookAt(cam->cameraPos, vec3_sub(cam->cameraPos, cam->cameraFront), cam->cameraUp);
 		Mat4 model = mat4_id(1.0f);
 		model = mat4_rotate(model, (float)glfwGetTime(), vec3$(0.5f, 1.0f, 0.0f));
-		//Mat4 view = mat4_id(1.0f);
-		//view = mat4_translate(view, vec3$(0.0f, 0.0f, -3.0f));
 		Mat4 projection;
 		projection = mat4_perspective(to_radians(45.0f), (float)SCREEN_WITH / (float)SCREEN_HEIGHT, 0.1f, 100.0f);
 		int modelLoc = glGetUniformLocation(shaderProgram, "model");
