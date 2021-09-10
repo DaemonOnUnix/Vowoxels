@@ -32,6 +32,8 @@ GLFWwindow* glinit(){
     ASSERT(!glewInit(), "Glew Init successful. (%s)", "Glew init failed with code %s", glewGetErrorString(glewInit()));
 	glfwSetWindowTitle(data->window, "Playground");
 	glEnable(GL_DEPTH_TEST);
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
 	//glfwSetInputMode(data->window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 	glfwSetCursorPosCallback(data->window, mouse_callback);
     return data->window;
