@@ -14,10 +14,12 @@
 
 bool viewMode = false;
 bool firstMouse = true;
+bool mouseEnabled = true;
 float lastX = 400;
 float lastY = 300;
 float yaw;
 float pitch;
+float mouseSpeed = 200.0f;
 
 GLFWwindow* glinit(){
 	EngineData* data = getEngineData();
@@ -25,7 +27,7 @@ GLFWwindow* glinit(){
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-    data->window = glfwCreateWindow(SCREEN_WITH, SCREEN_HEIGHT, "Playground", NULL, NULL);
+    data->window = glfwCreateWindow(data->width, data->height, "Playground", NULL, NULL);
     qASSERT(data->window);
 	glfwMakeContextCurrent(data->window);
     glewExperimental = GL_TRUE; 
@@ -33,9 +35,12 @@ GLFWwindow* glinit(){
 	glfwSetWindowTitle(data->window, "Playground");
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_BLEND);
-	glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
-	//glfwSetInputMode(data->window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-	glfwSetCursorPosCallback(data->window, mouse_callback);
+	glEnable(GL_CULL_FACE);
+	//glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	glfwSetInputMode(data->window, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
+	glfwSetCursorPos(data->window, data->width/2.0f, data->height/2.0f);
+	glfwSetWindowSizeCallback(data->window, window_size_callback);
     return data->window;
 }
 
@@ -129,6 +134,15 @@ void processInput(float deltaTime){
 		data->camera->cameraPos = vec3_sub(data->camera->cameraPos, vec3_mul_val(vec3_unit(vec3_cross(data->camera->cameraFront, data->camera->cameraUp)), cameraSpeed));
 	if (glfwGetKey(data->window, GLFW_KEY_D) == GLFW_PRESS)
 		data->camera->cameraPos = vec3_add(data->camera->cameraPos, vec3_mul_val(vec3_unit(vec3_cross(data->camera->cameraFront, data->camera->cameraUp)), cameraSpeed));
+	if (glfwGetKey(data->window, GLFW_KEY_ESCAPE)){
+		glfwSetInputMode(data->window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+		mouseEnabled = false;
+	}
+	if (glfwGetMouseButton(data->window, GLFW_MOUSE_BUTTON_LEFT)){
+		glfwSetInputMode(data->window, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
+		mouseEnabled = true;
+		glfwSetCursorPos(data->window , data->width/2.0f, data->height/2.0f);
+	}
 	if (glfwGetKey(data->window, GLFW_KEY_P) == GLFW_PRESS){
 		if (viewMode) {
 			glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
@@ -139,7 +153,25 @@ void processInput(float deltaTime){
 			viewMode = !viewMode;
 		}
 	}
-		
+	// Cursor Pos
+	if(mouseEnabled){
+		double xpos, ypos;
+		glfwGetCursorPos(data->window, &xpos, &ypos);
+
+		yaw   += mouseSpeed * deltaTime * (float)( data->width/2 - xpos );
+		pitch += mouseSpeed * deltaTime * (float)( data->height/2 - ypos );
+
+		if(pitch > 89.0f)
+			pitch =  89.0f;
+		if(pitch < -89.0f)
+			pitch = -89.0f;
+
+		Vec3 front = vec3$(cos(to_radians(pitch)) * sin(to_radians(yaw)), sin(to_radians(pitch)), cos(to_radians(pitch)) * cos(to_radians(yaw)));
+		data->camera->cameraFront = vec3_unit(front);
+
+		// Set cursor middle of the screen	
+		glfwSetCursorPos(data->window, data->width/2.0f, data->height/2.0f);
+	}
 }
 
 void drawLoop(unsigned int VAO, Chunk* chunk){
@@ -166,9 +198,9 @@ void drawLoop(unsigned int VAO, Chunk* chunk){
 		// Le cube
         Mat4 view = mat4_lookAt(data->camera->cameraPos, vec3_sub(data->camera->cameraPos, data->camera->cameraFront), data->camera->cameraUp);
 		Mat4 model = mat4_id(1.0f);
-		model = mat4_rotate(model, (float)glfwGetTime(), vec3$(0.5f, 1.0f, 0.0f));
+		//model = mat4_rotate(model, (float)glfwGetTime(), vec3$(0.5f, 1.0f, 0.0f));
 		Mat4 projection;
-		projection = mat4_perspective(to_radians(45.0f), (float)SCREEN_WITH / (float)SCREEN_HEIGHT, 0.1f, 100.0f);
+		projection = mat4_perspective(to_radians(45.0f), (float)data->width / (float)data->height, 0.1f, 100.0f);
 		int modelLoc = glGetUniformLocation(data->shaderProgram, "model");
 		int viewLoc = glGetUniformLocation(data->shaderProgram, "view");
 		int projectionLoc = glGetUniformLocation(data->shaderProgram, "projection");
@@ -186,33 +218,11 @@ void drawLoop(unsigned int VAO, Chunk* chunk){
 	}
 }
 
-
-void mouse_callback(GLFWwindow* window, double xpos, double ypos){
+void window_size_callback(GLFWwindow* window, int width, int height)
+{
 	UNUSED(window);
-	if(firstMouse)
-    {
-        lastX = xpos;
-        lastY = ypos;
-        firstMouse = false;
-    }
-
-	float xoffset = xpos - lastX;
-	float yoffset = lastY - ypos; // il faut inverser car ypos est donné de haut en bas
-	lastX = xpos;
-	lastY = ypos;
-
-	float sensitivity = 0.05f;
-	xoffset *= sensitivity;
-	yoffset *= sensitivity;
-
-	yaw   += xoffset;
-	pitch += yoffset;
-
-	if(pitch > 89.0f)
-		pitch =  89.0f;
-	if(pitch < -89.0f)
-		pitch = -89.0f;
-
-	Vec3 front = vec3$(cos(to_radians(pitch)) * cos(to_radians(yaw)), sin(to_radians(pitch)), cos(to_radians(pitch)) * sin(to_radians(yaw)));
-	getEngineData()->camera->cameraFront = vec3_unit(front);
+	EngineData* data = getEngineData();
+	data->width = width;
+	data->height = height;
+	glViewport(0, 0, width, height);
 }

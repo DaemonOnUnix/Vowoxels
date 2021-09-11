@@ -11,6 +11,8 @@ typedef struct
     Camera* camera;
     unsigned int shaderProgram;
     struct Atlas* atlas;
+    unsigned int height;
+    unsigned int width;
 } EngineData;
 
 extern EngineData* data;
