@@ -118,7 +118,7 @@ Camera* initCamera(Vec3 cameraPos, Vec3 cameraFront, Vec3 cameraUp){
 	cam->cameraPos   = cameraPos;
 	cam->cameraFront = cameraFront;
 	cam->cameraUp    = cameraUp;
-	cam->cameraSpeed = 2.5f;
+	cam->cameraSpeed = 10.0f;
 	return cam;
 }
 

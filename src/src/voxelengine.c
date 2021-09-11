@@ -216,10 +216,10 @@ void updateChunkVertex(Chunk* chunk){
                     VERTEX_BUFFER_E(x, y+1, z+1, voxelXPerc*(float)tilesx_index[0], voxelYPerc*((float)tilesy_index[0]+0.9f));
                     VERTEX_BUFFER_E(x, y+1, z, voxelXPerc*(float)tilesx_index[0], voxelYPerc*(float)tilesy_index[0]);
                     VERTEX_BUFFER_E(x+1, y+1, z, voxelXPerc*((float)tilesx_index[0]+1), voxelYPerc*(float)tilesy_index[0]);
-                    // (1,1,0)
-                    chunk->triangles_buffer[triangles_count++] = vertex_count + 3 - 4;
                     // (0,1,0)
                     chunk->triangles_buffer[triangles_count++] = vertex_count + 1 - 4;
+                    // (1,1,0)
+                    chunk->triangles_buffer[triangles_count++] = vertex_count + 3 - 4;
                     // (1,1,1)
                     chunk->triangles_buffer[triangles_count++] = vertex_count + 2 - 4;
                     // (1,1,1)
