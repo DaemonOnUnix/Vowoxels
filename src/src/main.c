@@ -31,12 +31,6 @@ int main() {
     glinit();
     data->camera = initCamera(vec3$(0.0f, 0.0f,  3.0f), vec3$(0.0f, 0.0f, -1.0f), vec3$(0.0f, 1.0f,  0.0f));
 	data->shaderProgram = bindShader();
-
-	unsigned int VBO, VAO, IBO;
-    glGenVertexArrays(1, &VAO);
-    glBindVertexArray(VAO);
-    glGenBuffers(1, &VBO);
-    glGenBuffers(1, &IBO);
     
     // Texture
     createAtlas("testres/terrain.png", 16, 16, 0, 0, NULL);
@@ -49,7 +43,8 @@ int main() {
     data->atlas->next->tile_info[10].facemask = FACE_DOWN;
 
     // TEST CHUNK
-	Chunk* chunk = calloc(1, sizeof(Chunk));
+	Chunk* chunk = newChunk();
+	Chunk* chunk2 = newChunk();
     for (size_t x = 0; x < CHUNK_DIMENSION; x++)
     {
         for (size_t y = 0; y < CHUNK_DIMENSION; y++)
@@ -58,35 +53,18 @@ int main() {
             {
                 if (y <= 0){
                     chunk->voxel_list[INDEX_TO_CHUNK(x, y, z)] = 1;
-                }
+                } else
+                    chunk2->voxel_list[INDEX_TO_CHUNK(x, y, z)] = 1;
             }
             
         }
         
     }
     
-    
-    updateChunkVertex(chunk);
+    updateChunk(chunk);
+    updateChunk(chunk2);
 
-
-
-    // Vertex buffer
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(struct Vertex) * chunk->vertex_count, chunk->vertex_buffer, GL_STATIC_DRAW);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
-    glEnableVertexAttribArray(0);
-    // Texture Buffer
-    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
-    glEnableVertexAttribArray(1);
-
-
-    // Index buffer
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, IBO);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned int) * chunk->triangles_count, chunk->triangles_buffer, GL_STATIC_DRAW);
-
-    glBindVertexArray(VAO);
-
-	drawLoop(VAO, chunk);
+	drawLoop(0, chunk, chunk2);
 
 
     glDeleteTextures(1, &data->atlas->next->texture->m_texture);

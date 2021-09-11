@@ -8,7 +8,7 @@ GLFWwindow* glinit();
 void glend();
 unsigned int bindShader();
 void processInput(float deltaTime);
-void drawLoop(unsigned int VAO, Chunk* chunk);
+void drawLoop(unsigned int VAO, Chunk* chunk, Chunk* chunk2);
 void window_size_callback(GLFWwindow* window, int width, int height);
 
 #endif

@@ -85,7 +85,7 @@ unsigned int bindShader(){
 	"in vec2 TexCoord;"
 	"void main()\n"
 	"{\n"
-	"    FragColor = texture2D(sampler, TexCoord);\n"
+	"    FragColor = texture(sampler, TexCoord);\n"
 	"}\n";
 
 	unsigned int fragmentShader;
@@ -174,7 +174,15 @@ void processInput(float deltaTime){
 	}
 }
 
-void drawLoop(unsigned int VAO, Chunk* chunk){
+void drawChunk(Chunk* chunk){
+
+	glBindVertexArray(chunk->VAO);
+	glActiveTexture(GL_TEXTURE0);
+
+	glDrawElements(GL_TRIANGLES, chunk->triangles_count, GL_UNSIGNED_INT, (void*)0);
+}
+
+void drawLoop(unsigned int VAO, Chunk* chunk, Chunk* chunk2){
 	EngineData* data = getEngineData();
 
 	float deltaTime = 0.0f; // Time between current frame and last frame
@@ -210,10 +218,8 @@ void drawLoop(unsigned int VAO, Chunk* chunk){
 
 		tests(data->window);
 		
-        glBindVertexArray(VAO);
-	    glActiveTexture(GL_TEXTURE0);
-
-        glDrawElements(GL_TRIANGLES, chunk->triangles_count, GL_UNSIGNED_INT, (void*)0);
+		drawChunk(chunk);
+		drawChunk(chunk2);
 
 		glfwSwapBuffers(data->window);
 		glfwPollEvents();

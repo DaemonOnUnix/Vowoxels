@@ -28,6 +28,9 @@ typedef struct {
     int32_t chunk_y;
     int32_t chunk_z;
 
+	unsigned int VAO;
+	unsigned int VBO[2];
+
     int32_t voxel_list[CHUNK_NUM_VOXEL];
     enum voxel_mask voxel_mask[CHUNK_NUM_VOXEL];
 
@@ -43,9 +46,11 @@ typedef struct {
     . prefix##z = ((index)/((CHUNK_DIMENSION)*(CHUNK_DIMENSION)))}
 #define INDEX_TO_CHUNK(x, y, z) ((x) + ((CHUNK_DIMENSION) * (y)) + ((CHUNK_DIMENSION) * (CHUNK_DIMENSION) * (z)))
 
+Chunk* newChunk();
 unsigned char saveChunkToFile(Chunk* chunk, char* dir);
 char* create_filename(char* dir, int32_t chunk_x, int32_t chunk_y, int32_t chunk_z);
 Chunk* loadChunkFromFile(char* dir, int32_t chunk_x, int32_t chunk_y, int32_t chunk_z);
 void updateChunkVertex(Chunk* chunk);
+void updateChunk(Chunk* chunk);
 
 #endif

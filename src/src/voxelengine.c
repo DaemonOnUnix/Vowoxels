@@ -1,3 +1,4 @@
+#include <GL/glew.h>
 #include "voxelengine/chunk.h"
 #include "voxelengine/texture.h"
 #include "voxelengine/data.h"
@@ -12,8 +13,12 @@
 #define bool unsigned char
 #endif
 
-void newChunk(Chunk* new){
-    UNUSED(new);
+Chunk* newChunk(){
+    Chunk* chunk = calloc(1, sizeof(Chunk));
+    glGenVertexArrays(1, &chunk->VAO);
+    glGenBuffers(2, chunk->VBO);
+    LOG_OK("Created a new chunk")
+    return chunk;
 }
 
 pogstr create_filename(char* dir, int32_t chunk_x, int32_t chunk_y, int32_t chunk_z){
@@ -288,6 +293,26 @@ void updateChunkVertex(Chunk* chunk){
     LOG_INFO("Triangles count : %lu", chunk->triangles_count/3);
 }
 
+void updateChunk(Chunk* chunk){
+    updateChunkVertex(chunk);
+    // Vertex buffer
+    glBindVertexArray(chunk->VAO);
+    glBindBuffer(GL_ARRAY_BUFFER, chunk->VBO[0]);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(struct Vertex) * chunk->vertex_count, chunk->vertex_buffer, GL_STATIC_DRAW);
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
+    // Texture Buffer
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
+
+
+    // Index buffer
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, chunk->VBO[1]);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned int) * chunk->triangles_count, chunk->triangles_buffer, GL_STATIC_DRAW);
+
+    glBindVertexArray(chunk->VAO);
+}
+
 void autoGenTileInfo(unsigned int atlasIndex){
     EngineData* data = getEngineData();
     struct Atlas* atlas = data->atlas;
@@ -363,5 +388,3 @@ void loadTexture(char* fileName, struct Atlas* atlas){
 
     SDL_FreeSurface(image_surface);
 }
-//for nb of tiles 
-//one id for each bloc
