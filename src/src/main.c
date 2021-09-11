@@ -39,14 +39,32 @@ int main() {
     glGenBuffers(1, &IBO);
     
     // Texture
-    createAtlas("testres/terrain.png", 16, 16, NULL);
+    createAtlas("testres/terrain.png", 16, 16, 0, 0, NULL);
+    data->atlas->next->tile_info[0].id = 2;
+    data->atlas->next->tile_info[8].id = 1;
+    data->atlas->next->tile_info[8].facemask = FACE_SIDES;
+    data->atlas->next->tile_info[9].id = 1;
+    data->atlas->next->tile_info[9].facemask = FACE_UP;
+    data->atlas->next->tile_info[10].id = 1;
+    data->atlas->next->tile_info[10].facemask = FACE_DOWN;
 
     // TEST CHUNK
 	Chunk* chunk = calloc(1, sizeof(Chunk));
-    for (size_t i = 0; i < 16*16; i++)
+    for (size_t x = 0; x < CHUNK_DIMENSION; x++)
     {
-        chunk->voxel_list[i*3] = i;
+        for (size_t y = 0; y < CHUNK_DIMENSION; y++)
+        {
+            for (size_t z = 0; z < CHUNK_DIMENSION; z++)
+            {
+                if (y <= 0){
+                    chunk->voxel_list[INDEX_TO_CHUNK(x, y, z)] = 1;
+                }
+            }
+            
+        }
+        
     }
+    
     
     updateChunkVertex(chunk);
 

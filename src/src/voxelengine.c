@@ -116,7 +116,7 @@ Chunk* loadChunkFromFile(char* dir, int32_t chunk_x, int32_t chunk_y, int32_t ch
     chunk->vertex_buffer[vertex_count].uv_y = (_uvy);\
     vertex_count++;
 
-#define FACE_ID_IF(_face, _index) {if (atlas->tile_info[index_x*atlas->tiley + index_y].facemask & (_face)){\
+#define FACE_ID_IF(_face, _index) {if (atlas->tile_info[index_x + index_y*atlas->tilex].facemask & (_face)){\
         tilesx_index[(_index)] = index_x;\
         tilesy_index[(_index)] = index_y;\
         found++;\
@@ -140,7 +140,7 @@ void updateChunkVertex(Chunk* chunk){
                 {
                     for (uint32_t index_y = 0; found < 6 && index_y < atlas->tiley; index_y++)
                     {
-                        if (atlas->tile_info[index_x*atlas->tiley + index_y].id == voxel_id)
+                        if (atlas->tile_info[index_x + index_y*atlas->tilex].id == voxel_id)
                         {
                             FACE_ID_IF(FACE_UP, 0u)
                             FACE_ID_IF(FACE_DOWN, 1u)
@@ -157,15 +157,19 @@ void updateChunkVertex(Chunk* chunk){
                     continue;
                 }
 
-                float voxelXPerc = 1 / (float)atlas->tilex;
-                float voxelYPerc = 1 / (float)atlas->tiley;
+                float voxelXPerc = 1.0f / (float)atlas->tilex;
+                float voxelYPerc = 1.0f / (float)atlas->tiley;
+                float offsetXPerc = 1.0f / (float)(atlas->tilex-atlas->offset_x);
+                float offsetYPerc= 1.0f / (float)(atlas->tiley-atlas->offset_y);
 
                 // Check vertex need
                 if((x == 0 || !chunk->voxel_list[INDEX_TO_CHUNK(x-1, y, z)])){
-                    VERTEX_BUFFER_E(x, y, z+1, voxelXPerc*(float)tilesx_index[3], voxelYPerc*((float)tilesy_index[3]+0.9f));
-                    VERTEX_BUFFER_E(x, y, z, voxelXPerc*((float)tilesx_index[3]+1.0f), voxelYPerc*((float)tilesy_index[3]+0.9f));
-                    VERTEX_BUFFER_E(x, y+1, z+1, voxelXPerc*(float)tilesx_index[3], voxelYPerc*(float)tilesy_index[3]);
-                    VERTEX_BUFFER_E(x, y+1, z, voxelXPerc*((float)tilesx_index[3]+1.0f), voxelYPerc*(float)tilesy_index[3]);
+                    float xuv = voxelXPerc*tilesx_index[3];
+                    float yuv = voxelYPerc*tilesy_index[3];
+                    VERTEX_BUFFER_E(x, y, z+1, xuv+offsetXPerc, yuv+offsetYPerc);
+                    VERTEX_BUFFER_E(x, y, z, xuv, yuv+offsetYPerc);
+                    VERTEX_BUFFER_E(x, y+1, z+1, xuv+offsetXPerc, yuv);
+                    VERTEX_BUFFER_E(x, y+1, z, xuv, yuv);
 
                     // (0,1,1)
                     chunk->triangles_buffer[triangles_count++] = vertex_count + 2 - 4;
@@ -181,10 +185,12 @@ void updateChunkVertex(Chunk* chunk){
                     chunk->triangles_buffer[triangles_count++] = vertex_count + 1 - 4;
                 }
                 if((x == CHUNK_DIMENSION-1 || !chunk->voxel_list[INDEX_TO_CHUNK(x+1, y, z)])) {
-                    VERTEX_BUFFER_E(x+1, y+1, z+1, voxelXPerc*((float)tilesx_index[2]+1), voxelYPerc*(float)tilesy_index[2]);
-                    VERTEX_BUFFER_E(x+1, y, z+1, voxelXPerc*((float)tilesx_index[2]+1), voxelYPerc*((float)tilesy_index[2]+0.9f));
-                    VERTEX_BUFFER_E(x+1, y, z, voxelXPerc*(float)tilesx_index[2], voxelYPerc*((float)tilesy_index[2]+0.9f));
-                    VERTEX_BUFFER_E(x+1, y+1, z, voxelXPerc*(float)tilesx_index[2], voxelYPerc*(float)tilesy_index[2]);
+                    float xuv = voxelXPerc*tilesx_index[2];
+                    float yuv = voxelYPerc*tilesy_index[2];
+                    VERTEX_BUFFER_E(x+1, y+1, z+1, xuv, yuv);
+                    VERTEX_BUFFER_E(x+1, y, z+1, xuv, yuv+offsetYPerc);
+                    VERTEX_BUFFER_E(x+1, y, z, xuv+offsetXPerc, yuv+offsetYPerc);
+                    VERTEX_BUFFER_E(x+1, y+1, z, xuv+offsetXPerc, yuv);
                     
                     // (1,1,1)
                     chunk->triangles_buffer[triangles_count++] = vertex_count + 3 - 4;
@@ -200,10 +206,12 @@ void updateChunkVertex(Chunk* chunk){
                     chunk->triangles_buffer[triangles_count++] = vertex_count + 1 - 4;
                 }
                 if((y == 0 || !chunk->voxel_list[INDEX_TO_CHUNK(x, y-1, z)]) ){
-                    VERTEX_BUFFER_E(x, y, z+1, voxelXPerc*((float)tilesx_index[1]+1), voxelYPerc*(float)tilesy_index[1]);
-                    VERTEX_BUFFER_E(x+1, y, z+1, voxelXPerc*((float)tilesx_index[1]+1), voxelYPerc*((float)tilesy_index[1]+0.9f));
-                    VERTEX_BUFFER_E(x, y, z, voxelXPerc*(float)tilesx_index[1], voxelYPerc*(float)tilesy_index[1]);
-                    VERTEX_BUFFER_E(x+1, y, z, voxelXPerc*(float)tilesx_index[1], voxelYPerc*((float)tilesy_index[1]+0.9f));
+                    float xuv = voxelXPerc*tilesx_index[1];
+                    float yuv = voxelYPerc*tilesy_index[1];
+                    VERTEX_BUFFER_E(x, y, z+1, xuv+offsetXPerc, yuv);
+                    VERTEX_BUFFER_E(x+1, y, z+1, xuv+offsetXPerc, yuv+offsetYPerc);
+                    VERTEX_BUFFER_E(x, y, z, xuv, yuv);
+                    VERTEX_BUFFER_E(x+1, y, z, xuv, yuv+offsetYPerc);
                     chunk->triangles_buffer[triangles_count++] = vertex_count-4+3;
                     chunk->triangles_buffer[triangles_count++] = vertex_count-4+1;
                     chunk->triangles_buffer[triangles_count++] = vertex_count-4+2;
@@ -212,10 +220,12 @@ void updateChunkVertex(Chunk* chunk){
                     chunk->triangles_buffer[triangles_count++] = vertex_count-4;
                 }
                 if((y == CHUNK_DIMENSION-1 || !chunk->voxel_list[INDEX_TO_CHUNK(x, y+1, z)]) ){
-                    VERTEX_BUFFER_E(x+1, y+1, z+1, voxelXPerc*((float)tilesx_index[0]+1), voxelYPerc*((float)tilesy_index[0]+0.9f));
-                    VERTEX_BUFFER_E(x, y+1, z+1, voxelXPerc*(float)tilesx_index[0], voxelYPerc*((float)tilesy_index[0]+0.9f));
-                    VERTEX_BUFFER_E(x, y+1, z, voxelXPerc*(float)tilesx_index[0], voxelYPerc*(float)tilesy_index[0]);
-                    VERTEX_BUFFER_E(x+1, y+1, z, voxelXPerc*((float)tilesx_index[0]+1), voxelYPerc*(float)tilesy_index[0]);
+                    float xuv = voxelXPerc*tilesx_index[0];
+                    float yuv = voxelYPerc*tilesy_index[0];
+                    VERTEX_BUFFER_E(x+1, y+1, z+1, xuv+offsetXPerc, yuv+offsetYPerc);
+                    VERTEX_BUFFER_E(x, y+1, z+1, xuv, yuv+offsetYPerc);
+                    VERTEX_BUFFER_E(x, y+1, z, xuv, yuv);
+                    VERTEX_BUFFER_E(x+1, y+1, z, xuv+offsetXPerc, yuv);
                     // (0,1,0)
                     chunk->triangles_buffer[triangles_count++] = vertex_count + 1 - 4;
                     // (1,1,0)
@@ -230,10 +240,12 @@ void updateChunkVertex(Chunk* chunk){
                     chunk->triangles_buffer[triangles_count++] = vertex_count + 0 - 4;
                 }
                 if((z == 0 || !chunk->voxel_list[INDEX_TO_CHUNK(x, y, z-1)])){
-                    VERTEX_BUFFER_E(x, y, z, voxelXPerc*(float)tilesx_index[4], voxelYPerc*((float)tilesy_index[4]+0.9f));
-                    VERTEX_BUFFER_E(x+1, y, z, voxelXPerc*((float)tilesx_index[4]+1), voxelYPerc*((float)tilesy_index[4]+0.9f));
-                    VERTEX_BUFFER_E(x, y+1, z, voxelXPerc*(float)tilesx_index[4], voxelYPerc*(float)tilesy_index[4]);
-                    VERTEX_BUFFER_E(x+1, y+1, z, voxelXPerc*((float)tilesx_index[4]+1), voxelYPerc*(float)tilesy_index[4]);
+                    float xuv = voxelXPerc*tilesx_index[4];
+                    float yuv = voxelYPerc*tilesy_index[4];
+                    VERTEX_BUFFER_E(x, y, z, xuv+offsetXPerc, yuv+offsetYPerc);
+                    VERTEX_BUFFER_E(x+1, y, z, xuv, yuv+offsetYPerc);
+                    VERTEX_BUFFER_E(x, y+1, z, xuv+offsetXPerc, yuv);
+                    VERTEX_BUFFER_E(x+1, y+1, z, xuv, yuv);
                     // (0,1,0)
                     chunk->triangles_buffer[triangles_count++] = vertex_count + 2 - 4;
                     // (1,1,0)
@@ -248,10 +260,12 @@ void updateChunkVertex(Chunk* chunk){
                     chunk->triangles_buffer[triangles_count++] = vertex_count + 1 - 4;
                 }
                 if((z == CHUNK_DIMENSION-1 || !chunk->voxel_list[INDEX_TO_CHUNK(x, y, z+1)])){
-                    VERTEX_BUFFER_E(x, y, z+1, voxelXPerc*((float)tilesx_index[5]+1), voxelYPerc*((float)tilesy_index[5]+0.9f));
-                    VERTEX_BUFFER_E(x+1, y, z+1, voxelXPerc*(float)tilesx_index[5], voxelYPerc*((float)tilesy_index[5]+0.9f));
-                    VERTEX_BUFFER_E(x, y+1, z+1, voxelXPerc*((float)tilesx_index[5]+1), voxelYPerc*(float)tilesy_index[5]);
-                    VERTEX_BUFFER_E(x+1, y+1, z+1, voxelXPerc*(float)tilesx_index[5], voxelYPerc*(float)tilesy_index[5]);
+                    float xuv = voxelXPerc*tilesx_index[5];
+                    float yuv = voxelYPerc*tilesy_index[5];
+                    VERTEX_BUFFER_E(x, y, z+1, xuv, yuv+offsetYPerc);
+                    VERTEX_BUFFER_E(x+1, y, z+1, xuv+offsetXPerc, yuv+offsetYPerc);
+                    VERTEX_BUFFER_E(x, y+1, z+1, xuv, yuv);
+                    VERTEX_BUFFER_E(x+1, y+1, z+1, xuv+offsetXPerc, yuv);
                     // (0,1,1)
                     chunk->triangles_buffer[triangles_count++] = vertex_count + 2 - 4;
                     // (0,0,1)
@@ -282,14 +296,13 @@ void autoGenTileInfo(unsigned int atlasIndex){
     }
     unsigned int nb_blc = atlas->next->tilex * atlas->next->tiley;
     atlas->next->tile_info = malloc(sizeof(Tile) * nb_blc);
-    qASSERT(atlas->next->tile_info);
     for (size_t id = 0; id < nb_blc; id++) {
         atlas->next->tile_info[id].id = (unsigned int)(id+1);
         atlas->next->tile_info[id].facemask = FACE_ALL;
     }
 }
 
-unsigned int createAtlas(char* fileName, uint8_t tiles_x,  uint8_t tiles_y, Tile* tile_info){
+unsigned int createAtlas(char* fileName, uint8_t tiles_x,  uint8_t tiles_y, uint8_t offset_x,  uint8_t offset_y, Tile* tile_info){
     EngineData* data = getEngineData();
     unsigned int atlasIndex = 0;
     struct Atlas* atlas = data->atlas;
@@ -301,11 +314,18 @@ unsigned int createAtlas(char* fileName, uint8_t tiles_x,  uint8_t tiles_y, Tile
     loadTexture(fileName, atlas->next);
     atlas->next->tilex = tiles_x;
     atlas->next->tiley = tiles_y;
+    atlas->next->offset_x = offset_x;
+    atlas->next->offset_y = offset_y;
+    char isAutoGen[10];
+    memcpy(isAutoGen, "False", 6);
     if (tile_info)
         atlas->tile_info = tile_info;
-    else
+    else{
+        memcpy(isAutoGen, "True", 5);
         autoGenTileInfo(atlasIndex);
-    
+    }
+    LOG_OK("Created new atlas:\n\tId: %u\n\tTexture: %s\n\tTiles x: %u\n\tTiles y: %u\n\tOffset x: %u\n\tOffset y: %u\n\tAutoGen: %s", 
+    atlasIndex, fileName, atlas->next->tilex, atlas->next->tiley, atlas->next->offset_x, atlas->next->offset_y, isAutoGen)
     return atlasIndex;
 }
 
@@ -316,24 +336,30 @@ void loadTexture(char* fileName, struct Atlas* atlas){
         return;
     }
     atlas->texture = malloc(sizeof(Texture));
+    char mode[6];
+    memcpy(mode, "RGB", 4);
     atlas->texture->mode = GL_RGB;
-    if(image_surface->format->BitsPerPixel>=4)
+    if(image_surface->format->BitsPerPixel>=4){
+        memcpy(mode, "RGBA", 5);
         atlas->texture->mode = GL_RGBA;
+    }
     atlas->texture->height = image_surface->h;
     atlas->texture->width = image_surface->w;
 
+    LOG_OK("Successfuly load texture:\n\tName: \"%s\"\n\tWidth: %u\n\tHeight: %u\n\tMode: %s", fileName, atlas->texture->width, atlas->texture->height, mode)
+
     glGenTextures(1, &atlas->texture->m_texture);
+    glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, atlas->texture->m_texture);
+
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, image_surface->w, image_surface->h, 0, atlas->texture->mode, GL_UNSIGNED_BYTE, image_surface->pixels);
 
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, image_surface->w, image_surface->h, 0, atlas->texture->mode, GL_UNSIGNED_BYTE, image_surface->pixels);
-
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, atlas->texture->m_texture);
+    LOG_INFO("Texture bind to atlas")
 
     SDL_FreeSurface(image_surface);
 }

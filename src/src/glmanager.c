@@ -19,7 +19,7 @@ float lastX = 400;
 float lastY = 300;
 float yaw;
 float pitch;
-float mouseSpeed = 200.0f;
+float mouseSpeed = 2000.0f;
 
 GLFWwindow* glinit(){
 	EngineData* data = getEngineData();
@@ -34,10 +34,10 @@ GLFWwindow* glinit(){
     ASSERT(!glewInit(), "Glew Init successful. (%s)", "Glew init failed with code %s", glewGetErrorString(glewInit()));
 	glfwSetWindowTitle(data->window, "Playground");
 	glEnable(GL_DEPTH_TEST);
-	glEnable(GL_BLEND);
 	glEnable(GL_CULL_FACE);
+	//glEnable(GL_BLEND);
 	//glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	//glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glfwSetInputMode(data->window, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
 	glfwSetCursorPos(data->window, data->width/2.0f, data->height/2.0f);
 	glfwSetWindowSizeCallback(data->window, window_size_callback);
@@ -211,6 +211,8 @@ void drawLoop(unsigned int VAO, Chunk* chunk){
 		tests(data->window);
 		
         glBindVertexArray(VAO);
+	    glActiveTexture(GL_TEXTURE0);
+
         glDrawElements(GL_TRIANGLES, chunk->triangles_count, GL_UNSIGNED_INT, (void*)0);
 
 		glfwSwapBuffers(data->window);
