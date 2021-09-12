@@ -178,6 +178,8 @@ void drawChunk(Chunk* chunk){
 	if(!chunk->VAO){
 		updateChunk(chunk);
 	}
+	int modelLoc = glGetUniformLocation(data->shaderProgram, "model");
+	glUniformMatrix4fv(modelLoc, 1, GL_FALSE, chunk->model.data);
 	glBindVertexArray(chunk->VAO);
 	glActiveTexture(GL_TEXTURE0);
 
@@ -207,14 +209,10 @@ void drawLoop(){
 
 		// Le cube
         Mat4 view = mat4_lookAt(data->camera->cameraPos, vec3_sub(data->camera->cameraPos, data->camera->cameraFront), data->camera->cameraUp);
-		Mat4 model = mat4_id(1.0f);
-		//model = mat4_rotate(model, (float)glfwGetTime(), vec3$(0.5f, 1.0f, 0.0f));
 		Mat4 projection;
 		projection = mat4_perspective(to_radians(45.0f), (float)data->width / (float)data->height, 0.1f, 100.0f);
-		int modelLoc = glGetUniformLocation(data->shaderProgram, "model");
 		int viewLoc = glGetUniformLocation(data->shaderProgram, "view");
 		int projectionLoc = glGetUniformLocation(data->shaderProgram, "projection");
-		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, model.data);
 		glUniformMatrix4fv(viewLoc, 1, GL_FALSE, view.data);
 		glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, projection.data);
 

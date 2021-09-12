@@ -13,9 +13,23 @@
 #define bool unsigned char
 #endif
 
-Chunk* newChunk(){
+Chunk* newChunk(int32_t chunk_x, int32_t chunk_y, int32_t chunk_z){
     Chunk* chunk = calloc(1, sizeof(Chunk));
     chunk->VAO = 0;
+
+    chunk->transform.m_pos = vec3_mul_val(vec3$(chunk_x, chunk_y, chunk_z), CHUNK_DIMENSION);
+    chunk->transform.m_rot = vec3$(0, 0, 0);
+    chunk->transform.m_scale = vec3$(1.0f, 1.0f, 1.0f);
+
+    Mat4 posMatrix = mat4_translate(mat4_id(1.0f), chunk->transform.m_pos);
+    Mat4 rotXMatrix = mat4_rotate(mat4_id(1.0f), chunk->transform.m_rot.x, vec3$(1,0,0));
+    Mat4 rotYMatrix = mat4_rotate(mat4_id(1.0f), chunk->transform.m_rot.y, vec3$(0,1,0));
+    Mat4 rotZMatrix = mat4_rotate(mat4_id(1.0f), chunk->transform.m_rot.z, vec3$(0,0,1));
+    Mat4 scaleMatrix = mat4_scale(mat4_id(1.0f), chunk->transform.m_scale);
+
+    Mat4 rotMatrix = mat4_mult(rotZMatrix, mat4_mult(rotYMatrix, rotXMatrix));
+
+	chunk->model = mat4_mult(posMatrix, mat4_mult(rotMatrix, scaleMatrix));
     LOG_OK("Created a new chunk")
     return chunk;
 }

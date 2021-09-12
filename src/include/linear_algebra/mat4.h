@@ -161,4 +161,25 @@ static inline Mat4 mat4_lookAt(Vec3 eye, Vec3 center, Vec3 up){
     return res;
 }
 
+static inline Mat4 mat4_scale(Mat4 mat, Vec3 scale){
+    Mat4 res = mat4$();
+    res.data COORD(0,0) = mat.data COORD(0,0) * scale.x;
+    res.data COORD(0,1) = mat.data COORD(0,1) * scale.x;
+    res.data COORD(0,2) = mat.data COORD(0,2) * scale.x;
+    res.data COORD(0,3) = mat.data COORD(0,3) * scale.x;
+    res.data COORD(1,0) = mat.data COORD(1,0) * scale.y;
+    res.data COORD(1,1) = mat.data COORD(1,1) * scale.y;
+    res.data COORD(1,2) = mat.data COORD(1,2) * scale.y;
+    res.data COORD(1,3) = mat.data COORD(1,3) * scale.y;
+    res.data COORD(2,0) = mat.data COORD(2,0) * scale.z;
+    res.data COORD(2,1) = mat.data COORD(2,1) * scale.z;
+    res.data COORD(2,2) = mat.data COORD(2,2) * scale.z;
+    res.data COORD(2,3) = mat.data COORD(2,3) * scale.z;
+    res.data COORD(3,0) = mat.data COORD(3,0);
+    res.data COORD(3,1) = mat.data COORD(3,1);
+    res.data COORD(3,2) = mat.data COORD(3,2);
+    res.data COORD(3,3) = mat.data COORD(3,3);
+    return res;
+}
+
 #endif

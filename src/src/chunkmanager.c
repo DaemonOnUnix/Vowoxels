@@ -66,35 +66,32 @@ void updateCoord(int* dir, int32_t* x, int32_t* y, int32_t* z, int32_t camx, int
     {
     case 0:
         (*x)++;
-        if (*x >= camx+(VIEW_DIST/2))
-            (*dir)++;
+        (*dir)++;
         break;
     case 1:
-        (*y)++;
-        if (*y >= camy+(VIEW_DIST/2))
+        (*z)++;
+        if (*z == *x)
             (*dir)++;
         break;
     case 2:
-        (*z)++;
-        if (*z >= camz+(VIEW_DIST/2))
+        (*x)--;
+        if (*x == -(*z))
             (*dir)++;
         break;
     case 3:
-        (*x)--;
-        if (*x <= camx-(VIEW_DIST/2))
+        (*z)--;
+        if (*x == *z)
             (*dir)++;
         break;
     case 4:
-        (*y)--;
-        if (*y <= camy-(VIEW_DIST/2))
-            (*dir)++;
+        (*x)++;
+        if (*x == -(*z))
+            if(VIEW_DIST > *x)
+                (*dir)=0;
+            else
+                (*dir)++;
         break;
     case 5:
-        (*z)--;
-        if (*z <= camz-(VIEW_DIST/2))
-            (*dir)++;
-        break;
-    case 6:
         LOG_INFO("Finish to load all CHUNKS")
         while(!__sync_bool_compare_and_swap(&(data->chunkM->need_update), 1, 2));
         __sync_synchronize();
@@ -166,14 +163,14 @@ void* thread_loading_chunks(void *args){
         if(!chunk){
             // TODO: Generate Chunk
             // TEST CHUNK
-            chunk = newChunk();
+            chunk = newChunk(camx+x, camy+y, camz+z);
             for (size_t x = 0; x < CHUNK_DIMENSION; x++)
             {
                 for (size_t y = 0; y < CHUNK_DIMENSION; y++)
                 {
                     for (size_t z = 0; z < CHUNK_DIMENSION; z++)
                     {
-                        if (y <= 0){
+                        if (y <= 0 && (x == CHUNK_DIMENSION-1 || x==0 || z == 0 || z ==CHUNK_DIMENSION-1)){
                             chunk->voxel_list[INDEX_TO_CHUNK(x, y, z)] = 1;
                         }
                     }
