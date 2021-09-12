@@ -16,13 +16,11 @@ typedef struct {
 
     atomic_bool need_update;
     struct chunk_list* chunks;
+    struct chunk_list* chunks_toFree;
     pthread_t working_th;
 } Chunk_manager;
 
 struct chunk_list {
-    int32_t chunk_x;
-    int32_t chunk_y;
-    int32_t chunk_z;
     Chunk* chunk;
     struct chunk_list* next;
 };
@@ -32,5 +30,7 @@ Chunk_manager* initChunkManager();
 void updateChunks(Vec3 camera_pos);
 
 void* thread_loading_chunks(void *args);
+
+void toFreeChunk();
 
 #endif

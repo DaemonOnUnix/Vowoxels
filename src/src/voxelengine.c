@@ -17,6 +17,10 @@ Chunk* newChunk(int32_t chunk_x, int32_t chunk_y, int32_t chunk_z){
     Chunk* chunk = calloc(1, sizeof(Chunk));
     chunk->VAO = 0;
 
+    chunk->chunk_x = chunk_x;
+    chunk->chunk_y = chunk_y;
+    chunk->chunk_z = chunk_z;
+
     chunk->transform.m_pos = vec3_mul_val(vec3$(chunk_x, chunk_y, chunk_z), CHUNK_DIMENSION);
     chunk->transform.m_rot = vec3$(0, 0, 0);
     chunk->transform.m_scale = vec3$(1.0f, 1.0f, 1.0f);
@@ -30,7 +34,7 @@ Chunk* newChunk(int32_t chunk_x, int32_t chunk_y, int32_t chunk_z){
     Mat4 rotMatrix = mat4_mult(rotZMatrix, mat4_mult(rotYMatrix, rotXMatrix));
 
 	chunk->model = mat4_mult(posMatrix, mat4_mult(rotMatrix, scaleMatrix));
-    LOG_OK("Created a new chunk")
+    LOG_OK("Create chunk %i %i %i", chunk_x, chunk_y, chunk_z)
     return chunk;
 }
 
@@ -300,8 +304,6 @@ void updateChunkVertex(Chunk* chunk){
     }
     chunk->vertex_count = vertex_count;
     chunk->triangles_count = triangles_count;
-    LOG_INFO("Vertex count : %lu", chunk->vertex_count);
-    LOG_INFO("Triangles count : %lu", chunk->triangles_count/3);
 }
 
 void updateChunk(Chunk* chunk){

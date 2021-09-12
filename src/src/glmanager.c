@@ -175,6 +175,8 @@ void processInput(float deltaTime){
 }
 
 void drawChunk(Chunk* chunk){
+	if(!chunk)
+		return;
 	if(!chunk->VAO){
 		updateChunk(chunk);
 	}
@@ -221,6 +223,7 @@ void drawLoop(){
 		{
 			drawChunk(ch->chunk);
 		}
+		updateChunks(data->camera->cameraPos);
 
 		glfwSwapBuffers(data->window);
 		glfwPollEvents();
