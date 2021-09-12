@@ -32,7 +32,7 @@ int main() {
 	data->width = 640;
 	data->height = 480;
     glinit();
-    data->camera = initCamera(vec3$(0.0f, 0.0f,  3.0f), vec3$(0.0f, 0.0f, -1.0f), vec3$(0.0f, 1.0f,  0.0f));
+    data->camera = initCamera(vec3$(5.0f, 5.0f,  5.0f), vec3$(0.0f, 0.0f, -1.0f), vec3$(0.0f, 1.0f,  0.0f));
 	data->shaderProgram = bindShader();
     
     // Texture

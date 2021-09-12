@@ -19,7 +19,7 @@ float lastX = 400;
 float lastY = 300;
 float yaw;
 float pitch;
-float mouseSpeed = 2000.0f;
+float mouseSpeed = 200.0f;
 
 GLFWwindow* glinit(){
 	EngineData* data = getEngineData();

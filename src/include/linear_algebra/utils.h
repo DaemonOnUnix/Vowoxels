@@ -35,6 +35,10 @@ static inline uint32_t fast_rand(void)
     (float)((float)fast_rand() / (float)4294967296)
 /* you may want to implement here the fastest implementation */
 
+static inline mapfloat(float value, float vmin, float vmax, float nmin, float nmax){
+    return (value - vmin) * (nmax - nmin) / (vmax - vmin) + nmin;
+}
+
 #ifndef NOT_USE_INTRINSIC
 
 #    include <immintrin.h>

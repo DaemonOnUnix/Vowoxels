@@ -5,8 +5,6 @@
 #include "linear_algebra/perlinnoise.h"
 
 CREATE_COMMON(chunk_manager_pos);
-static float gradient[IYMAX][IXMAX][2];
-
 
 Chunk_manager* initChunkManager(){
     EngineData* data = getEngineData();
@@ -20,15 +18,6 @@ Chunk_manager* initChunkManager(){
     pthread_create(&data->chunkM->working_th, NULL, thread_loading_chunks, NULL);
     pthread_detach(data->chunkM->working_th);
 
-        for (size_t i = 0; i < IYMAX; i++)
-    {
-        for (size_t j = 0; j < IXMAX; j++)
-        {
-            gradient[i][j][0] = random_float();
-            gradient[i][j][1] = random_float();
-        }
-        
-    }
     return data->chunkM;
 }
 
@@ -105,6 +94,10 @@ void updateChunks(Vec3 camera_pos){
 
 void updateCoord(int* dir, int32_t* x, int32_t* y, int32_t* z, int32_t camx, int32_t camy, int32_t camz){
     UNUSED(camy);
+    if(*y<0){
+        LOG_INFO("UNDER THE MAP")
+        *dir = 5;
+    }
     switch (*dir)
     {
     case 0:
@@ -209,9 +202,9 @@ void* thread_loading_chunks(void *args){
             {
                 for (size_t _z = 0; _z < CHUNK_DIMENSION; _z++)
                 {
-                    float p = perlin((float)x*CHUNK_DIMENSION + (float)(_x+1)/(float)CHUNK_DIMENSION,(float)z*CHUNK_DIMENSION + (float)(_z+1)/(float)CHUNK_DIMENSION);
+                    float p = perlin2d((float)x*CHUNK_DIMENSION + _x,(float)z*CHUNK_DIMENSION + _z, 0.01, 4);
                     
-                    float h = mapfloat(abs(p), 0.0f, 1.0f, 0.0f, MAX_HEIGHT);
+                    float h = mapfloat(p, 0.0f, 1.0f, 0.0f, MAX_HEIGHT);
                     for (size_t _y = 0; _y < CHUNK_DIMENSION && y*CHUNK_DIMENSION+_y < h; _y++)
                     {
                         chunk->voxel_list[INDEX_TO_CHUNK(_x, _y, _z)] = 1;
@@ -237,43 +230,3 @@ void* thread_loading_chunks(void *args){
     pthread_exit(NULL);
 }
 
-// Computes the dot product of the distance and gradient vectors.
-float dotGridGradient(int ix, int iy, float x, float y) {
-
-    // Precomputed (or otherwise) gradient vectors at each grid node
-    extern float gradient[IYMAX][IXMAX][2];
-
-    // Compute the distance vector
-    float dx = x - (float)ix;
-    float dy = y - (float)iy;
-
-    // Compute the dot-product
-    return (dx*gradient[iy][ix][0] + dy*gradient[iy][ix][1]);
-}
- 
-// Compute Perlin noise at coordinates x, y
-float perlin(float x, float y) {
-
-    // Determine grid cell coordinates
-    int x0 = floorf(x);
-    int x1 = x0 + 1;
-    int y0 = floorf(y);
-    int y1 = y0 + 1;
-
-    // Determine interpolation weights
-    // Could also use higher order polynomial/s-curve here
-    float sx = x - (float)x0;
-    float sy = y - (float)y0;
-
-    // Interpolate between grid point gradients
-    float n0, n1, ix0, ix1, value;
-    n0 = dotGridGradient(x0, y0, x, y);
-    n1 = dotGridGradient(x1, y0, x, y);
-    ix0 = lerp(n0, n1, sx);
-    n0 = dotGridGradient(x0, y1, x, y);
-    n1 = dotGridGradient(x1, y1, x, y);
-    ix1 = lerp(n0, n1, sx);
-    value = lerp(ix0, ix1, sy);
-
-    return value;
-}
