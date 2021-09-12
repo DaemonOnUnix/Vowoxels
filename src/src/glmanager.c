@@ -175,14 +175,16 @@ void processInput(float deltaTime){
 }
 
 void drawChunk(Chunk* chunk){
-
+	if(!chunk->VAO){
+		updateChunk(chunk);
+	}
 	glBindVertexArray(chunk->VAO);
 	glActiveTexture(GL_TEXTURE0);
 
 	glDrawElements(GL_TRIANGLES, chunk->triangles_count, GL_UNSIGNED_INT, (void*)0);
 }
 
-void drawLoop(unsigned int VAO, Chunk* chunk, Chunk* chunk2){
+void drawLoop(){
 	EngineData* data = getEngineData();
 
 	float deltaTime = 0.0f; // Time between current frame and last frame
@@ -217,9 +219,10 @@ void drawLoop(unsigned int VAO, Chunk* chunk, Chunk* chunk2){
 		glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, projection.data);
 
 		tests(data->window);
-		
-		drawChunk(chunk);
-		drawChunk(chunk2);
+		for (struct chunk_list* ch = data->chunkM->chunks; ch; ch = ch->next)
+		{
+			drawChunk(ch->chunk);
+		}
 
 		glfwSwapBuffers(data->window);
 		glfwPollEvents();

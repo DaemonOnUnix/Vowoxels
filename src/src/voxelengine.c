@@ -15,8 +15,7 @@
 
 Chunk* newChunk(){
     Chunk* chunk = calloc(1, sizeof(Chunk));
-    glGenVertexArrays(1, &chunk->VAO);
-    glGenBuffers(2, chunk->VBO);
+    chunk->VAO = 0;
     LOG_OK("Created a new chunk")
     return chunk;
 }
@@ -24,11 +23,9 @@ Chunk* newChunk(){
 pogstr create_filename(char* dir, int32_t chunk_x, int32_t chunk_y, int32_t chunk_z){
     // Create filename
     pogstr filename = string(dir);
-    LOG_INFO("Filename '%s' length : %ld", filename, str_pog_len(filename));
     char buffer[50] = {0};
     sprintf(buffer, "%u_%u_%u", (uint32_t)chunk_x, (uint32_t)chunk_y, (uint32_t)chunk_z);
     filename = _str_cat(filename, string(buffer));
-    LOG_INFO("Filename : %s", filename);
     return filename;
 }
 
@@ -85,7 +82,7 @@ Chunk* loadChunkFromFile(char* dir, int32_t chunk_x, int32_t chunk_y, int32_t ch
 
     // Read Chunk
     int chunk_fd = open(filename, O_RDONLY);
-    if(!chunk_fd) {
+    if(chunk_fd <= 0) {
         return NULL;
     }
     smartstr pogstr _data = UNWRAP(pogstr, _string_from_fd(chunk_fd, 0));
@@ -294,7 +291,11 @@ void updateChunkVertex(Chunk* chunk){
 }
 
 void updateChunk(Chunk* chunk){
-    updateChunkVertex(chunk);
+    if(!chunk->VAO){
+        glGenVertexArrays(1, &chunk->VAO);
+        glGenBuffers(2, chunk->VBO);
+    }
+
     // Vertex buffer
     glBindVertexArray(chunk->VAO);
     glBindBuffer(GL_ARRAY_BUFFER, chunk->VBO[0]);

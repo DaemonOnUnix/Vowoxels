@@ -9,6 +9,7 @@ typedef struct
 {
     GLFWwindow* window;
     Camera* camera;
+    Chunk_manager* chunkM;
     unsigned int shaderProgram;
     struct Atlas* atlas;
     unsigned int height;

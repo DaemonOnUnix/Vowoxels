@@ -42,29 +42,9 @@ int main() {
     data->atlas->next->tile_info[10].id = 1;
     data->atlas->next->tile_info[10].facemask = FACE_DOWN;
 
-    // TEST CHUNK
-	Chunk* chunk = newChunk();
-	Chunk* chunk2 = newChunk();
-    for (size_t x = 0; x < CHUNK_DIMENSION; x++)
-    {
-        for (size_t y = 0; y < CHUNK_DIMENSION; y++)
-        {
-            for (size_t z = 0; z < CHUNK_DIMENSION; z++)
-            {
-                if (y <= 0){
-                    chunk->voxel_list[INDEX_TO_CHUNK(x, y, z)] = 1;
-                } else
-                    chunk2->voxel_list[INDEX_TO_CHUNK(x, y, z)] = 1;
-            }
-            
-        }
-        
-    }
-    
-    updateChunk(chunk);
-    updateChunk(chunk2);
+    data->chunkM = initChunkManager();
 
-	drawLoop(0, chunk, chunk2);
+	drawLoop();
 
 
     glDeleteTextures(1, &data->atlas->next->texture->m_texture);
