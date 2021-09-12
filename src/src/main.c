@@ -22,8 +22,11 @@
 
 #include "voxelengine/data.h"
 EngineData* data;
+#include "linear_algebra/perlinnoise.h"
 
 int main() {
+    
+
     data = malloc(sizeof(data));
     data->atlas = calloc(1, sizeof(struct Atlas));
 	data->width = 640;
@@ -35,12 +38,12 @@ int main() {
     // Texture
     createAtlas("testres/terrain.png", 16, 16, 0, 0, NULL);
     data->atlas->next->tile_info[0].id = 2;
-    data->atlas->next->tile_info[8].id = 1;
-    data->atlas->next->tile_info[8].facemask = FACE_SIDES;
-    data->atlas->next->tile_info[9].id = 1;
-    data->atlas->next->tile_info[9].facemask = FACE_UP;
-    data->atlas->next->tile_info[10].id = 1;
-    data->atlas->next->tile_info[10].facemask = FACE_DOWN;
+    data->atlas->next->tile_info[68].id = 1;
+    data->atlas->next->tile_info[68].facemask = FACE_SIDES;
+    data->atlas->next->tile_info[66].id = 1;
+    data->atlas->next->tile_info[66].facemask = FACE_UP;
+    data->atlas->next->tile_info[2].id = 1;
+    data->atlas->next->tile_info[2].facemask = FACE_DOWN;
 
     data->chunkM = initChunkManager();
 

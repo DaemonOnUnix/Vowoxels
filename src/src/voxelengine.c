@@ -38,6 +38,14 @@ Chunk* newChunk(int32_t chunk_x, int32_t chunk_y, int32_t chunk_z){
     return chunk;
 }
 
+void freeChunk(Chunk* chunk){
+    if(chunk->VAO){
+        glDeleteBuffers(1, &chunk->VAO);
+        glDeleteBuffers(2, chunk->VBO);
+    }
+    free(chunk);
+}
+
 pogstr create_filename(char* dir, int32_t chunk_x, int32_t chunk_y, int32_t chunk_z){
     // Create filename
     pogstr filename = string(dir);

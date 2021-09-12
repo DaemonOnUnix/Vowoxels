@@ -5,6 +5,7 @@
 #include "../linear_algebra/vec3.h"
 #include "../linear_algebra/mat4.h"
 #define CHUNK_DIMENSION 10
+#define MAX_HEIGHT 20
 #define CHUNK_NUM_VOXEL (CHUNK_DIMENSION * CHUNK_DIMENSION * CHUNK_DIMENSION)
 
 enum voxel_mask {
@@ -61,5 +62,7 @@ char* create_filename(char* dir, int32_t chunk_x, int32_t chunk_y, int32_t chunk
 Chunk* loadChunkFromFile(char* dir, int32_t chunk_x, int32_t chunk_y, int32_t chunk_z);
 void updateChunkVertex(Chunk* chunk);
 void updateChunk(Chunk* chunk);
+void freeChunk(Chunk* chunk);
+
 
 #endif

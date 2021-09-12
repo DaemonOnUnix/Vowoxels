@@ -2,8 +2,10 @@
 #include "pthread/locks.h"
 #include "voxelengine/data.h"
 #include "metaprog/utils.h"
+#include "linear_algebra/perlinnoise.h"
 
 CREATE_COMMON(chunk_manager_pos);
+static float gradient[IYMAX][IXMAX][2];
 
 
 Chunk_manager* initChunkManager(){
@@ -17,6 +19,16 @@ Chunk_manager* initChunkManager(){
     // Create newx thread
     pthread_create(&data->chunkM->working_th, NULL, thread_loading_chunks, NULL);
     pthread_detach(data->chunkM->working_th);
+
+        for (size_t i = 0; i < IYMAX; i++)
+    {
+        for (size_t j = 0; j < IXMAX; j++)
+        {
+            gradient[i][j][0] = random_float();
+            gradient[i][j][1] = random_float();
+        }
+        
+    }
     return data->chunkM;
 }
 
@@ -27,7 +39,7 @@ void toFreeChunk(){
         struct chunk_list* chnk = data->chunkM->chunks_toFree;
         while (chnk->next != NULL)
         {
-            free(chnk->chunk);
+            freeChunk(chnk->chunk);
             struct chunk_list* temp = chnk;
             chnk = chnk->next;
             free(temp);
@@ -193,15 +205,16 @@ void* thread_loading_chunks(void *args){
             // TODO: Generate Chunk
             // TEST CHUNK
             chunk = newChunk(x, y, z);
-            for (size_t x = 0; x < CHUNK_DIMENSION; x++)
+            for (size_t _x = 0; _x < CHUNK_DIMENSION; _x++)
             {
-                for (size_t y = 0; y < CHUNK_DIMENSION; y++)
+                for (size_t _z = 0; _z < CHUNK_DIMENSION; _z++)
                 {
-                    for (size_t z = 0; z < CHUNK_DIMENSION; z++)
+                    float p = perlin((float)x*CHUNK_DIMENSION + (float)(_x+1)/(float)CHUNK_DIMENSION,(float)z*CHUNK_DIMENSION + (float)(_z+1)/(float)CHUNK_DIMENSION);
+                    
+                    float h = mapfloat(abs(p), 0.0f, 1.0f, 0.0f, MAX_HEIGHT);
+                    for (size_t _y = 0; _y < CHUNK_DIMENSION && y*CHUNK_DIMENSION+_y < h; _y++)
                     {
-                        if (y <= 0 && (x == CHUNK_DIMENSION-1 || x==0 || z == 0 || z ==CHUNK_DIMENSION-1)){
-                            chunk->voxel_list[INDEX_TO_CHUNK(x, y, z)] = 1;
-                        }
+                        chunk->voxel_list[INDEX_TO_CHUNK(_x, _y, _z)] = 1;
                     }
                     
                 }
@@ -222,4 +235,45 @@ void* thread_loading_chunks(void *args){
     }
 
     pthread_exit(NULL);
+}
+
+// Computes the dot product of the distance and gradient vectors.
+float dotGridGradient(int ix, int iy, float x, float y) {
+
+    // Precomputed (or otherwise) gradient vectors at each grid node
+    extern float gradient[IYMAX][IXMAX][2];
+
+    // Compute the distance vector
+    float dx = x - (float)ix;
+    float dy = y - (float)iy;
+
+    // Compute the dot-product
+    return (dx*gradient[iy][ix][0] + dy*gradient[iy][ix][1]);
+}
+ 
+// Compute Perlin noise at coordinates x, y
+float perlin(float x, float y) {
+
+    // Determine grid cell coordinates
+    int x0 = floorf(x);
+    int x1 = x0 + 1;
+    int y0 = floorf(y);
+    int y1 = y0 + 1;
+
+    // Determine interpolation weights
+    // Could also use higher order polynomial/s-curve here
+    float sx = x - (float)x0;
+    float sy = y - (float)y0;
+
+    // Interpolate between grid point gradients
+    float n0, n1, ix0, ix1, value;
+    n0 = dotGridGradient(x0, y0, x, y);
+    n1 = dotGridGradient(x1, y0, x, y);
+    ix0 = lerp(n0, n1, sx);
+    n0 = dotGridGradient(x0, y1, x, y);
+    n1 = dotGridGradient(x1, y1, x, y);
+    ix1 = lerp(n0, n1, sx);
+    value = lerp(ix0, ix1, sy);
+
+    return value;
 }
