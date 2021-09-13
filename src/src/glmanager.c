@@ -175,7 +175,7 @@ void processInput(float deltaTime){
 }
 
 void drawChunk(Chunk* chunk){
-	if(!chunk)
+	if(!chunk || chunk->deprecated)
 		return;
 	if(!chunk->VAO){
 		updateChunk(chunk);
@@ -221,8 +221,11 @@ void drawLoop(){
 		tests(data->window);
 		for (struct chunk_list* ch = data->chunkM->chunks; ch; ch = ch->next)
 		{
+			if(ch->chunk->deprecated)
+				break;
 			drawChunk(ch->chunk);
 		}
+		
 		updateChunks(data->camera->cameraPos);
 
 		glfwSwapBuffers(data->window);

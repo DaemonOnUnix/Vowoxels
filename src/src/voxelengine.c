@@ -34,6 +34,7 @@ Chunk* newChunk(int32_t chunk_x, int32_t chunk_y, int32_t chunk_z){
     Mat4 rotMatrix = mat4_mult(rotZMatrix, mat4_mult(rotYMatrix, rotXMatrix));
 
 	chunk->model = mat4_mult(posMatrix, mat4_mult(rotMatrix, scaleMatrix));
+    chunk->deprecated = false;
     //LOG_OK("Create chunk %i %i %i", chunk_x, chunk_y, chunk_z)
     return chunk;
 }
@@ -44,6 +45,7 @@ void freeChunk(Chunk* chunk){
         glDeleteBuffers(2, chunk->VBO);
     }
     free(chunk);
+    return;
 }
 
 pogstr create_filename(char* dir, int32_t chunk_x, int32_t chunk_y, int32_t chunk_z){
@@ -62,7 +64,7 @@ unsigned char saveChunkToFile(Chunk* chunk, char* dir){
 
     int chunk_fd = open(filename, O_CREAT | O_TRUNC | O_WRONLY, 0644);
     if(!chunk_fd) {
-        LOG_PANIC("Error while loading chunk file '%s'", filename);
+        LOG_PANIC("Error while saving chunk file '%s'", filename);
         return 0;
     }
 

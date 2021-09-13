@@ -36,6 +36,7 @@ typedef struct {
     int32_t chunk_y;
     int32_t chunk_z;
 
+    bool deprecated;
 	unsigned int VAO;
 	unsigned int VBO[2];
 

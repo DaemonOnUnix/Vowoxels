@@ -7,7 +7,7 @@
 #include <pthread.h>
 #include <stdatomic.h>
 
-#define VIEW_DIST 2
+#define VIEW_DIST 1
 
 typedef struct {
     int64_t actual_chunk_x;
@@ -16,6 +16,7 @@ typedef struct {
 
     atomic_bool need_update;
     struct chunk_list* chunks;
+    atomic_bool can_free;
     struct chunk_list* chunks_toFree;
     pthread_t working_th;
 } Chunk_manager;
