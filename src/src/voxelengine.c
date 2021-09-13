@@ -34,13 +34,13 @@ Chunk* newChunk(int32_t chunk_x, int32_t chunk_y, int32_t chunk_z){
     Mat4 rotMatrix = mat4_mult(rotZMatrix, mat4_mult(rotYMatrix, rotXMatrix));
 
 	chunk->model = mat4_mult(posMatrix, mat4_mult(rotMatrix, scaleMatrix));
-    LOG_OK("Create chunk %i %i %i", chunk_x, chunk_y, chunk_z)
+    //LOG_OK("Create chunk %i %i %i", chunk_x, chunk_y, chunk_z)
     return chunk;
 }
 
 void freeChunk(Chunk* chunk){
     if(chunk->VAO){
-        glDeleteBuffers(1, &chunk->VAO);
+        glDeleteVertexArrays(1, &chunk->VAO);
         glDeleteBuffers(2, chunk->VBO);
     }
     free(chunk);
@@ -323,7 +323,7 @@ void updateChunk(Chunk* chunk){
     // Vertex buffer
     glBindVertexArray(chunk->VAO);
     glBindBuffer(GL_ARRAY_BUFFER, chunk->VBO[0]);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(struct Vertex) * chunk->vertex_count, chunk->vertex_buffer, GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(struct Vertex) * chunk->vertex_count, chunk->vertex_buffer, GL_DYNAMIC_DRAW);
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
     // Texture Buffer
@@ -333,7 +333,7 @@ void updateChunk(Chunk* chunk){
 
     // Index buffer
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, chunk->VBO[1]);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned int) * chunk->triangles_count, chunk->triangles_buffer, GL_STATIC_DRAW);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned int) * chunk->triangles_count, chunk->triangles_buffer, GL_DYNAMIC_DRAW);
 
     glBindVertexArray(chunk->VAO);
 }
@@ -356,7 +356,11 @@ unsigned int createAtlas(char* fileName, uint8_t tiles_x,  uint8_t tiles_y, uint
     EngineData* data = getEngineData();
     unsigned int atlasIndex = 0;
     struct Atlas* atlas = data->atlas;
-    for (; atlas->next != NULL; atlas = atlas->next, atlasIndex++);
+    while (atlas->next != NULL)
+    {
+        atlas = atlas->next;
+        atlasIndex++;
+    }
     
     // New atlas
     atlas->next = malloc(sizeof(struct Atlas));

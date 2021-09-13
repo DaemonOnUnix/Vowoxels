@@ -10,9 +10,9 @@
 #define VIEW_DIST 2
 
 typedef struct {
-    int32_t actual_chunk_x;
-    int32_t actual_chunk_y;
-    int32_t actual_chunk_z;
+    int64_t actual_chunk_x;
+    int64_t actual_chunk_y;
+    int64_t actual_chunk_z;
 
     atomic_bool need_update;
     struct chunk_list* chunks;

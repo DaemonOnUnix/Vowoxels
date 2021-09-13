@@ -14,6 +14,7 @@ Chunk_manager* initChunkManager(){
     data->chunkM->actual_chunk_y = 0;
     data->chunkM->actual_chunk_z = 0;
     data->chunkM->chunks_toFree = NULL;
+    data->chunkM->need_update = 0;
     // Create newx thread
     pthread_create(&data->chunkM->working_th, NULL, thread_loading_chunks, NULL);
     pthread_detach(data->chunkM->working_th);
@@ -26,66 +27,80 @@ Chunk_manager* initChunkManager(){
 void toFreeChunk(){
     if(data->chunkM->chunks_toFree){
         struct chunk_list* chnk = data->chunkM->chunks_toFree;
-        while (chnk->next != NULL)
+        int i = 0;
+        while (chnk != NULL)
         {
             freeChunk(chnk->chunk);
             struct chunk_list* temp = chnk;
             chnk = chnk->next;
             free(temp);
+            i++;
         }
+        LOG_INFO("Freed %u chunks!", i)
         data->chunkM->chunks_toFree = NULL;
     }
 }
 
 void removeChunks(){
     EngineData* data = getEngineData();
+    int howmany = 0;
     struct chunk_list* prev = NULL;
-    struct chunk_list* next = NULL;
     struct chunk_list* tofree = data->chunkM->chunks_toFree;
-    for (struct chunk_list* chnk = data->chunkM->chunks; chnk != NULL; chnk = next) {
+    for (struct chunk_list* chnk = data->chunkM->chunks; chnk != NULL;) {
         //Distance chnk<>player_chnk > dist_affichage ?
         get_lock_chunk_manager_pos();
         if (
-            abs(chnk->chunk->chunk_x - data->chunkM->actual_chunk_x) > VIEW_DIST || 
-            abs(chnk->chunk->chunk_y - data->chunkM->actual_chunk_y) > VIEW_DIST ||
+            abs(chnk->chunk->chunk_x - data->chunkM->actual_chunk_x) > VIEW_DIST ||
             abs(chnk->chunk->chunk_z - data->chunkM->actual_chunk_z) > VIEW_DIST
             ) {
                 set_lock_chunk_manager_pos();
-                //B E  G O N E
-                if(prev)
-                    prev->next = chnk->next;
-                else
-                    data->chunkM->chunks = chnk->next;
-                next = chnk->next;
+                
+                // ADD to free list
                 if(!tofree){
                     data->chunkM->chunks_toFree = chnk;
-                    tofree = chnk;
+                    tofree = data->chunkM->chunks_toFree;
                 }else{
                     tofree->next = chnk;
                     tofree = tofree->next;
                 }
-                tofree->next = NULL;
-        }
-        else {
+                howmany++;
+                
+                // Remove from chunks list
+                struct chunk_list* tmp = chnk->next;
+                chnk->next = NULL;
+                if(prev)
+                    prev->next = tmp;
+                else
+                    data->chunkM->chunks = tmp;
+                prev = chnk;
+                chnk = tmp;
+        }else
+        {
             set_lock_chunk_manager_pos();
             prev = chnk;
-            next = chnk->next;
+            chnk = chnk->next;
         }
+        
     }
+    LOG_INFO("%u chunks to free!", howmany)
 }
+#include "collections/string.h"
 
 void updateChunks(Vec3 camera_pos){
     EngineData* data = getEngineData();
     // Check if camera change chunk
     if(
-        ((int)camera_pos.x)/CHUNK_DIMENSION != data->chunkM->actual_chunk_x ||
-        ((int)camera_pos.y)/CHUNK_DIMENSION != data->chunkM->actual_chunk_y ||
-        ((int)camera_pos.z)/CHUNK_DIMENSION != data->chunkM->actual_chunk_z ){
+        ((int64_t)camera_pos.x)/CHUNK_DIMENSION != data->chunkM->actual_chunk_x ||
+        ((int64_t)camera_pos.y)/CHUNK_DIMENSION != data->chunkM->actual_chunk_y ||
+        ((int64_t)camera_pos.z)/CHUNK_DIMENSION != data->chunkM->actual_chunk_z ){
         // ICI
         LOG_INFO("Chunks need update")
-        data->chunkM->actual_chunk_x = ((int)camera_pos.x)/CHUNK_DIMENSION;
-        data->chunkM->actual_chunk_y = ((int)camera_pos.y)/CHUNK_DIMENSION;
-        data->chunkM->actual_chunk_z = ((int)camera_pos.z)/CHUNK_DIMENSION;
+        data->chunkM->actual_chunk_x = ((int64_t)camera_pos.x)/CHUNK_DIMENSION;
+        data->chunkM->actual_chunk_y = ((int64_t)camera_pos.y)/CHUNK_DIMENSION;
+        data->chunkM->actual_chunk_z = ((int64_t)camera_pos.z)/CHUNK_DIMENSION;
+        smartstr pogstr pikalul = string("", 40 );
+        sprintf(pikalul, "x: %li; y: %li; z: %li", data->chunkM->actual_chunk_x, data->chunkM->actual_chunk_y, data->chunkM->actual_chunk_z);
+        glfwSetWindowTitle(data->window, pikalul);
         toFreeChunk();
         data->chunkM->need_update = 1;
     }
@@ -165,7 +180,7 @@ void updateCoord(int* dir, int32_t* x, int32_t* y, int32_t* z, int32_t camx, int
         PANIC("How did you get there ?");
         break;
     }
-    LOG_INFO("Updating Coord x: %i; y: %i; z: %i", *x, *y, *z)
+    // LOG_INFO("Updating Coord x: %i; y: %i; z: %i", *x, *y, *z)
 }
 
 void* thread_loading_chunks(void *args){

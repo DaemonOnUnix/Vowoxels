@@ -27,10 +27,11 @@ EngineData* data;
 int main() {
     
 
-    data = malloc(sizeof(data));
-    data->atlas = calloc(1, sizeof(struct Atlas));
-	data->width = 640;
-	data->height = 480;
+    data = malloc(sizeof(EngineData));
+    data->atlas = malloc(sizeof(struct Atlas));
+    data->atlas->next = NULL;
+	data->width = 1280;
+	data->height = 720;
     glinit();
     data->camera = initCamera(vec3$(5.0f, 5.0f,  5.0f), vec3$(0.0f, 0.0f, -1.0f), vec3$(0.0f, 1.0f,  0.0f));
 	data->shaderProgram = bindShader();

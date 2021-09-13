@@ -195,7 +195,7 @@ void drawLoop(){
 	float lastFrame = 0.0f; // Time of last frame
 
 	while (!glfwWindowShouldClose(data->window)){
-        glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+        glClearColor(0.0353f, 0.6941f, 0.9254f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 

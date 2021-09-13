@@ -10,10 +10,10 @@ typedef struct
     GLFWwindow* window;
     Camera* camera;
     Chunk_manager* chunkM;
-    unsigned int shaderProgram;
-    struct Atlas* atlas;
-    unsigned int height;
-    unsigned int width;
+    struct Atlas *atlas;
+    uint32_t shaderProgram;
+    uint16_t height;
+    uint16_t width;
 } EngineData;
 
 extern EngineData* data;

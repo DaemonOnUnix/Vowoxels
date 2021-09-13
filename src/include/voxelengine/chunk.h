@@ -2,8 +2,8 @@
 #define VOXELENGINE_CHUNK_H
 
 #include <stdint.h>
-#include "../linear_algebra/vec3.h"
-#include "../linear_algebra/mat4.h"
+#include "linear_algebra/vec3.h"
+#include "linear_algebra/mat4.h"
 #define CHUNK_DIMENSION 10
 #define MAX_HEIGHT 20
 #define CHUNK_NUM_VOXEL (CHUNK_DIMENSION * CHUNK_DIMENSION * CHUNK_DIMENSION)
