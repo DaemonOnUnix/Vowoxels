@@ -101,34 +101,62 @@ void updateCoord(int* dir, int32_t* x, int32_t* y, int32_t* z, int32_t camx, int
     switch (*dir)
     {
     case 0:
+        (*y) = camy+VIEW_DIST;
         (*x)++;
         (*dir)++;
         break;
     case 1:
-        (*z)++;
-        if (*z - camz == *x - camx)
+        (*y)--;
+        if(*y<=0){
+            (*y) = camy+VIEW_DIST;
             (*dir)++;
+        }
         break;
     case 2:
-        (*x)--;
-        if (*x - camx == -(*z - camz))
-            (*dir)++;
+        if((*y) == 0){
+            (*y) = camy+VIEW_DIST;
+            (*z)++;
+            if (*z - camz == *x - camx)
+                (*dir)++;
+        }else{
+            (*y)--;
+        }
         break;
     case 3:
-        (*z)--;
-        if (*x - camx == *z - camz)
-            (*dir)++;
+        if((*y) == 0){
+            (*y) = camy+VIEW_DIST;
+            (*x)--;
+            if (*x - camx == -(*z - camz))
+                (*dir)++;
+        }else{
+            (*y)--;
+        }
         break;
     case 4:
-        (*x)++;
-        if (*x - camx == -(*z - camz)){
-            if(VIEW_DIST > *x - camx)
-                (*dir)=0;
-            else
+        if((*y) == 0){
+            (*y) = camy+VIEW_DIST;
+            (*z)--;
+            if (*x - camx == *z - camz)
                 (*dir)++;
+        }else{
+            (*y)--;
         }
         break;
     case 5:
+        if((*y) == 0){
+            (*y) = camy+VIEW_DIST;
+            (*x)++;
+            if (*x - camx == -(*z - camz)){
+                if(VIEW_DIST > *x - camx)
+                    (*dir)=0;
+                else
+                    (*dir)++;
+            }
+        }else{
+            (*y)--;
+        }
+        break;
+    case 6:
         LOG_INFO("Finish to load all CHUNKS")
         while(!__sync_bool_compare_and_swap(&(data->chunkM->need_update), 1, 2));
         __sync_synchronize();
