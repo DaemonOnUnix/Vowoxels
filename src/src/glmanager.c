@@ -219,12 +219,14 @@ void drawLoop(){
 		glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, projection.data);
 
 		tests(data->window);
+		pthread_rwlock_rdlock(&data->chunkM->chunkslock);
 		for (struct chunk_list* ch = data->chunkM->chunks; ch; ch = ch->next)
 		{
 			if(ch->chunk->deprecated)
 				break;
 			drawChunk(ch->chunk);
 		}
+		pthread_rwlock_unlock(&data->chunkM->chunkslock);
 		
 		updateChunks(data->camera->cameraPos);
 

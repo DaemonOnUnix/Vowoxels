@@ -13,9 +13,8 @@ Chunk_manager* initChunkManager(){
     data->chunkM->actual_chunk_y = 0;
     data->chunkM->actual_chunk_z = 0;
     data->chunkM->chunks = NULL;
-    data->chunkM->chunks_toFree = NULL;
     data->chunkM->need_update = 0;
-    data->chunkM->can_free = 0;
+    pthread_rwlock_init(&data->chunkM->chunkslock, NULL);
     // Create newx thread
     pthread_create(&data->chunkM->working_th, NULL, thread_loading_chunks, NULL);
     pthread_detach(data->chunkM->working_th);
@@ -25,35 +24,60 @@ Chunk_manager* initChunkManager(){
 
 #define abs(x) (((x) >= 0) ? (x) : (x)*(-1))
 
-void toFreeChunk(){
-    if(!data->chunkM->need_update && data->chunkM->can_free && data->chunkM->chunks_toFree){
-        struct chunk_list* chnk = data->chunkM->chunks_toFree;
-        data->chunkM->chunks_toFree = NULL;
-        int i = 0;
-        while (chnk != NULL)
-        {
-            freeChunk(chnk->chunk);
-            struct chunk_list* temp = chnk;
-            chnk = chnk->next;
-            free(temp);
-            i++;
-        }
-        LOG_INFO("Freed %u chunks!", i)
+void insertChunkToChunklist(Chunk *chunk){
+    EngineData* data = getEngineData();
+    pthread_rwlock_wrlock(&data->chunkM->chunkslock);
+    struct chunk_list* new_chunk = malloc(sizeof(struct chunk_list));
+    new_chunk->chunk = chunk;
+    if(data->chunkM->chunks){
+        new_chunk->next = data->chunkM->chunks;
     }
-    data->chunkM->can_free = 0;
+    data->chunkM->chunks = new_chunk;
+    pthread_rwlock_unlock(&data->chunkM->chunkslock);
     return;
+}
+
+Chunk* deleteNextChunklist(struct chunk_list* ch_list_prev){
+    EngineData* data = getEngineData();
+    struct chunk_list* deleted_chunk_list = NULL;
+    Chunk* chunk_to_return = NULL;
+    pthread_rwlock_wrlock(&data->chunkM->chunkslock);
+
+    // Take deleted chunk list
+    if(!ch_list_prev){
+        // Delete the first one
+        deleted_chunk_list = data->chunkM->chunks;
+        // Skip deleted value
+        data->chunkM->chunks = deleted_chunk_list->next;
+    }else
+    {
+        // Delete the next to ch_list_prev
+        deleted_chunk_list = ch_list_prev->next;
+        // Skip deleted value
+        ch_list_prev->next = ch_list_prev->next->next;
+    }
+
+    // Keep his chunk
+    chunk_to_return = deleted_chunk_list->chunk;   
+
+    // Destroy link to the list
+    deleted_chunk_list->next = NULL;
+    free(deleted_chunk_list);
+
+    pthread_rwlock_unlock(&data->chunkM->chunkslock);
+    return chunk_to_return;
 }
 
 void removeChunks(){
     EngineData* data = getEngineData();
-    while (data->chunkM->can_free)
-    {
-    }
-    
     int howmany = 0;
+    int howmany2 = 0;
+    
+    // Remove chunks to far away from Camera
     struct chunk_list* prev = NULL;
-    struct chunk_list* tofree = data->chunkM->chunks_toFree;
+    pthread_rwlock_rdlock(&data->chunkM->chunkslock);
     for (struct chunk_list* chnk = data->chunkM->chunks; chnk != NULL;) {
+        pthread_rwlock_unlock(&data->chunkM->chunkslock);
         //Distance chnk<>player_chnk > dist_affichage ?
         get_lock_chunk_manager_pos();
         if (
@@ -61,43 +85,30 @@ void removeChunks(){
             abs(chnk->chunk->chunk_z - data->chunkM->actual_chunk_z) > VIEW_DIST+1
             ) {
                 set_lock_chunk_manager_pos();
-                
-                // ADD to free list
-                if(!tofree){
-                    data->chunkM->chunks_toFree = chnk;
-                    tofree = data->chunkM->chunks_toFree;
-                }else{
-                    tofree->next = chnk;
-                    tofree = tofree->next;
-                }
                 howmany++;
                 
                 // Remove from chunks list
-                struct chunk_list* tmp = chnk->next;
-                chnk->chunk->deprecated = true;
-                chnk->next = NULL;
-                if(prev)
-                    prev->next = tmp;
-                else{
-                    data->chunkM->chunks = tmp;
-                }
-                chnk = tmp;
+                Chunk* chunk_to_free = deleteNextChunklist(prev);
+                freeChunk(chunk_to_free);
+
+                // Set chnk
+                chnk = prev->next;
         }else
         {
             set_lock_chunk_manager_pos();
             prev = chnk;
             chnk = chnk->next;
         }
-        
+        howmany2++;
+        pthread_rwlock_rdlock(&data->chunkM->chunkslock);
     }
-    LOG_INFO("%u chunks to free!", howmany)
-    data->chunkM->can_free = 1;
+    pthread_rwlock_unlock(&data->chunkM->chunkslock);
+    LOG_INFO("%u freed on %u!", howmany, howmany2)
 }
 #include "collections/string.h"
 
 void updateChunks(Vec3 camera_pos){
     EngineData* data = getEngineData();
-    toFreeChunk();
     // Check if camera change chunk
     if(
         ((int64_t)camera_pos.x)/CHUNK_DIMENSION != data->chunkM->actual_chunk_x ||
@@ -111,6 +122,7 @@ void updateChunks(Vec3 camera_pos){
         smartstr pogstr pikalul = string("", 40 );
         sprintf(pikalul, "x: %li; y: %li; z: %li", data->chunkM->actual_chunk_x, data->chunkM->actual_chunk_y, data->chunkM->actual_chunk_z);
         glfwSetWindowTitle(data->window, pikalul);
+        removeChunks();
         data->chunkM->need_update = 1;
     }
 }
@@ -214,9 +226,6 @@ void* thread_loading_chunks(void *args){
         {
             data->chunkM->need_update = 0;
             LOG_INFO("Chunks updating")
-            // Remove far chunks
-            removeChunks();
-
             // Reset var
             dir = 0;
             x = data->chunkM->actual_chunk_x;
@@ -231,14 +240,17 @@ void* thread_loading_chunks(void *args){
 
         }
         // Shearch next chunk to load
+        pthread_rwlock_rdlock(&data->chunkM->chunkslock);
         for (struct chunk_list* chnk = data->chunkM->chunks; !data->chunkM->need_update && chnk != NULL; chnk = chnk->next) {
             if(chnk->chunk->chunk_x == x && chnk->chunk->chunk_y == y && chnk->chunk->chunk_z == z) {
+                pthread_rwlock_unlock(&data->chunkM->chunkslock);
                 updateCoord(&dir, &x, &y, &z, camx, camy, camz);
+                pthread_rwlock_rdlock(&data->chunkM->chunkslock);
             }
         }
+        pthread_rwlock_unlock(&data->chunkM->chunkslock);
 
         if (data->chunkM->need_update){
-            
             continue;
         }
         
@@ -269,12 +281,10 @@ void* thread_loading_chunks(void *args){
 
         // Create mesh
         updateChunkVertex(chunk);
-        
-        struct chunk_list* chunktmp = data->chunkM->chunks;
-        struct chunk_list* chunkst = malloc((sizeof(struct chunk_list)));
-        chunkst->next = chunktmp;
-        chunkst->chunk = chunk;
-        data->chunkM->chunks = chunkst;
+
+        // Add chunk to render
+        insertChunkToChunklist(chunk);
+
         updateCoord(&dir, &x, &y, &z, camx, camy, camz);
     }
 
