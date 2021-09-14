@@ -36,17 +36,17 @@ typedef struct {
     int32_t chunk_y;
     int32_t chunk_z;
 
-    bool deprecated;
+    bool is_air;
 	unsigned int VAO;
 	unsigned int VBO[2];
 
     int32_t voxel_list[CHUNK_NUM_VOXEL];
     enum voxel_mask voxel_mask[CHUNK_NUM_VOXEL];
 
-    struct Vertex vertex_buffer[4*6*CHUNK_NUM_VOXEL];
+    struct Vertex *vertex_buffer;
     int64_t vertex_count;
 
-    unsigned int triangles_buffer[6*6*CHUNK_NUM_VOXEL];
+    unsigned int *triangles_buffer;
     int64_t triangles_count;
 
     Transform transform;

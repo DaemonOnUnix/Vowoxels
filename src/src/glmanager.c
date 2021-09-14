@@ -175,7 +175,7 @@ void processInput(float deltaTime){
 }
 
 void drawChunk(Chunk* chunk){
-	if(!chunk || chunk->deprecated)
+	if(!chunk || chunk->is_air)
 		return;
 	if(!chunk->VAO){
 		updateChunk(chunk);
@@ -222,8 +222,8 @@ void drawLoop(){
 		pthread_rwlock_rdlock(&data->chunkM->chunkslock);
 		for (struct chunk_list* ch = data->chunkM->chunks; ch; ch = ch->next)
 		{
-			if(ch->chunk->deprecated)
-				break;
+			if(ch->chunk->is_air)
+				continue;
 			drawChunk(ch->chunk);
 		}
 		pthread_rwlock_unlock(&data->chunkM->chunkslock);

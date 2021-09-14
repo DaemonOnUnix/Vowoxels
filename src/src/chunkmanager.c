@@ -26,13 +26,18 @@ Chunk_manager* initChunkManager(){
 
 void insertChunkToChunklist(Chunk *chunk){
     EngineData* data = getEngineData();
+
+    // Malloc new node
+    struct chunk_list* new_chunk_list = malloc(sizeof(struct chunk_list));
+    new_chunk_list->chunk = chunk;
+    new_chunk_list->next = NULL;
+
+    // Add to the start of the list
     pthread_rwlock_wrlock(&data->chunkM->chunkslock);
-    struct chunk_list* new_chunk = malloc(sizeof(struct chunk_list));
-    new_chunk->chunk = chunk;
     if(data->chunkM->chunks){
-        new_chunk->next = data->chunkM->chunks;
+        new_chunk_list->next = data->chunkM->chunks;
     }
-    data->chunkM->chunks = new_chunk;
+    data->chunkM->chunks = new_chunk_list;
     pthread_rwlock_unlock(&data->chunkM->chunkslock);
     return;
 }
@@ -92,7 +97,10 @@ void removeChunks(){
                 freeChunk(chunk_to_free);
 
                 // Set chnk
-                chnk = prev->next;
+                chnk = data->chunkM->chunks;
+                if (prev)
+                    chnk = prev->next;
+                
         }else
         {
             set_lock_chunk_manager_pos();
@@ -122,14 +130,15 @@ void updateChunks(Vec3 camera_pos){
         smartstr pogstr pikalul = string("", 40 );
         sprintf(pikalul, "x: %li; y: %li; z: %li", data->chunkM->actual_chunk_x, data->chunkM->actual_chunk_y, data->chunkM->actual_chunk_z);
         glfwSetWindowTitle(data->window, pikalul);
-        removeChunks();
+        //removeChunks();
         data->chunkM->need_update = 1;
     }
 }
 
-
+#include <time.h>
 void updateCoord(int* dir, int32_t* x, int32_t* y, int32_t* z, int32_t camx, int32_t camy, int32_t camz){
     UNUSED(camy);
+    sleep(1);
     if(*y<0){
         LOG_INFO("UNDER THE MAP")
         *dir = 5;
@@ -182,17 +191,22 @@ void updateCoord(int* dir, int32_t* x, int32_t* y, int32_t* z, int32_t camx, int
         if((*y) == 0){
             (*y) = camy+VIEW_DIST;
             (*x)++;
-            if (*x - camx == -(*z - camz)){
-                if(VIEW_DIST > *x - camx)
-                    (*dir)=0;
-                else
-                    (*dir)++;
-            }
+            if (*x - camx == -(*z - camz))
+                (*dir)++;
         }else{
             (*y)--;
         }
         break;
     case 6:
+        (*y)--;
+        if((*y) == 0){
+            if(VIEW_DIST > *x - camx)
+                (*dir)=0;
+            else
+                (*dir)++;
+        }
+        break;
+    case 7:
         LOG_INFO("Finish to load all CHUNKS")
         while(!__sync_bool_compare_and_swap(&(data->chunkM->need_update), 1, 2));
         __sync_synchronize();
@@ -201,7 +215,7 @@ void updateCoord(int* dir, int32_t* x, int32_t* y, int32_t* z, int32_t camx, int
         PANIC("How did you get there ?");
         break;
     }
-    // LOG_INFO("Updating Coord x: %i; y: %i; z: %i", *x, *y, *z)
+    LOG_INFO("Updating Coord x: %i; y: %i; z: %i, dir: %i", *x, *y, *z, *dir)
 }
 
 void* thread_loading_chunks(void *args){
