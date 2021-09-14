@@ -39,10 +39,10 @@ int main() {
     // Texture
     createAtlas("testres/terrain.png", 16, 16, 0, 0, NULL);
     data->atlas->next->tile_info[0].id = 2;
-    data->atlas->next->tile_info[68].id = 1;
-    data->atlas->next->tile_info[68].facemask = FACE_SIDES;
-    data->atlas->next->tile_info[66].id = 1;
-    data->atlas->next->tile_info[66].facemask = FACE_UP;
+    data->atlas->next->tile_info[3].id = 1;
+    data->atlas->next->tile_info[3].facemask = FACE_SIDES;
+    data->atlas->next->tile_info[191].id = 1;
+    data->atlas->next->tile_info[191].facemask = FACE_UP;
     data->atlas->next->tile_info[2].id = 1;
     data->atlas->next->tile_info[2].facemask = FACE_DOWN;
 

@@ -1,11 +1,14 @@
 #include "voxelengine/data.h"
 #include "voxelengine/chunk.h"
 
-#define VERTEX_BUFFER_E(_x, _y, _z, _uvx, _uvy) chunk->vertex_buffer[vertex_count].x = _x;\
+#define VERTEX_BUFFER_E(_x, _y, _z, _uvx, _uvy, _nx, _ny, _nz) chunk->vertex_buffer[vertex_count].x = _x;\
     chunk->vertex_buffer[vertex_count].y = _y;\
     chunk->vertex_buffer[vertex_count].z = _z;\
     chunk->vertex_buffer[vertex_count].uv_x = (_uvx);\
     chunk->vertex_buffer[vertex_count].uv_y = (_uvy);\
+    chunk->vertex_buffer[vertex_count].normal_x = (_nx);\
+    chunk->vertex_buffer[vertex_count].normal_y = (_ny);\
+    chunk->vertex_buffer[vertex_count].normal_z = (_nz);\
     vertex_count++;
 
 #define FACE_ID_IF(_face, _index) {if (atlas->tile_info[index_x + index_y*atlas->tilex].facemask & (_face)){\
@@ -60,10 +63,10 @@ void updateChunkVertex(Chunk* chunk){
                     float yuv = voxelYPerc*tilesy_index[3];
                     chunk->vertex_buffer = realloc(chunk->vertex_buffer, sizeof(struct Vertex)*(vertex_count+4));
                     chunk->triangles_buffer = realloc(chunk->triangles_buffer, sizeof(struct Vertex)*(triangles_count+6));
-                    VERTEX_BUFFER_E(x, y, z+1, xuv+offsetXPerc, yuv+offsetYPerc);
-                    VERTEX_BUFFER_E(x, y, z, xuv, yuv+offsetYPerc);
-                    VERTEX_BUFFER_E(x, y+1, z+1, xuv+offsetXPerc, yuv);
-                    VERTEX_BUFFER_E(x, y+1, z, xuv, yuv);
+                    VERTEX_BUFFER_E(x, y, z+1, xuv+offsetXPerc, yuv+offsetYPerc, -1, 0, 0);
+                    VERTEX_BUFFER_E(x, y, z, xuv, yuv+offsetYPerc, -1, 0, 0);
+                    VERTEX_BUFFER_E(x, y+1, z+1, xuv+offsetXPerc, yuv, -1, 0, 0);
+                    VERTEX_BUFFER_E(x, y+1, z, xuv, yuv, -1, 0, 0);
 
                     // (0,1,1)
                     chunk->triangles_buffer[triangles_count++] = vertex_count + 2 - 4;
@@ -83,10 +86,10 @@ void updateChunkVertex(Chunk* chunk){
                     float yuv = voxelYPerc*tilesy_index[2];
                     chunk->vertex_buffer = realloc(chunk->vertex_buffer, sizeof(struct Vertex)*(vertex_count+4));
                     chunk->triangles_buffer = realloc(chunk->triangles_buffer, sizeof(struct Vertex)*(triangles_count+6));
-                    VERTEX_BUFFER_E(x+1, y+1, z+1, xuv, yuv);
-                    VERTEX_BUFFER_E(x+1, y, z+1, xuv, yuv+offsetYPerc);
-                    VERTEX_BUFFER_E(x+1, y, z, xuv+offsetXPerc, yuv+offsetYPerc);
-                    VERTEX_BUFFER_E(x+1, y+1, z, xuv+offsetXPerc, yuv);
+                    VERTEX_BUFFER_E(x+1, y+1, z+1, xuv, yuv, 1, 0, 0);
+                    VERTEX_BUFFER_E(x+1, y, z+1, xuv, yuv+offsetYPerc, 1, 0, 0);
+                    VERTEX_BUFFER_E(x+1, y, z, xuv+offsetXPerc, yuv+offsetYPerc, 1, 0, 0);
+                    VERTEX_BUFFER_E(x+1, y+1, z, xuv+offsetXPerc, yuv, 1, 0, 0);
                     
                     // (1,1,1)
                     chunk->triangles_buffer[triangles_count++] = vertex_count + 3 - 4;
@@ -106,10 +109,10 @@ void updateChunkVertex(Chunk* chunk){
                     float yuv = voxelYPerc*tilesy_index[1];
                     chunk->vertex_buffer = realloc(chunk->vertex_buffer, sizeof(struct Vertex)*(vertex_count+4));
                     chunk->triangles_buffer = realloc(chunk->triangles_buffer, sizeof(struct Vertex)*(triangles_count+6));
-                    VERTEX_BUFFER_E(x, y, z+1, xuv+offsetXPerc, yuv);
-                    VERTEX_BUFFER_E(x+1, y, z+1, xuv+offsetXPerc, yuv+offsetYPerc);
-                    VERTEX_BUFFER_E(x, y, z, xuv, yuv);
-                    VERTEX_BUFFER_E(x+1, y, z, xuv, yuv+offsetYPerc);
+                    VERTEX_BUFFER_E(x, y, z+1, xuv+offsetXPerc, yuv, 0, -1, 0);
+                    VERTEX_BUFFER_E(x+1, y, z+1, xuv+offsetXPerc, yuv+offsetYPerc, 0, -1, 0);
+                    VERTEX_BUFFER_E(x, y, z, xuv, yuv, 0, -1, 0);
+                    VERTEX_BUFFER_E(x+1, y, z, xuv, yuv+offsetYPerc, 0, -1, 0);
                     chunk->triangles_buffer[triangles_count++] = vertex_count-4+3;
                     chunk->triangles_buffer[triangles_count++] = vertex_count-4+1;
                     chunk->triangles_buffer[triangles_count++] = vertex_count-4+2;
@@ -122,10 +125,10 @@ void updateChunkVertex(Chunk* chunk){
                     float yuv = voxelYPerc*tilesy_index[0];
                     chunk->vertex_buffer = realloc(chunk->vertex_buffer, sizeof(struct Vertex)*(vertex_count+4));
                     chunk->triangles_buffer = realloc(chunk->triangles_buffer, sizeof(struct Vertex)*(triangles_count+6));
-                    VERTEX_BUFFER_E(x+1, y+1, z+1, xuv+offsetXPerc, yuv+offsetYPerc);
-                    VERTEX_BUFFER_E(x, y+1, z+1, xuv, yuv+offsetYPerc);
-                    VERTEX_BUFFER_E(x, y+1, z, xuv, yuv);
-                    VERTEX_BUFFER_E(x+1, y+1, z, xuv+offsetXPerc, yuv);
+                    VERTEX_BUFFER_E(x+1, y+1, z+1, xuv+offsetXPerc, yuv+offsetYPerc, 0, 1, 0);
+                    VERTEX_BUFFER_E(x, y+1, z+1, xuv, yuv+offsetYPerc, 0, 1, 0);
+                    VERTEX_BUFFER_E(x, y+1, z, xuv, yuv, 0, 1, 0);
+                    VERTEX_BUFFER_E(x+1, y+1, z, xuv+offsetXPerc, yuv, 0, 1, 0);
                     // (0,1,0)
                     chunk->triangles_buffer[triangles_count++] = vertex_count + 1 - 4;
                     // (1,1,0)
@@ -144,10 +147,10 @@ void updateChunkVertex(Chunk* chunk){
                     float yuv = voxelYPerc*tilesy_index[4];
                     chunk->vertex_buffer = realloc(chunk->vertex_buffer, sizeof(struct Vertex)*(vertex_count+4));
                     chunk->triangles_buffer = realloc(chunk->triangles_buffer, sizeof(struct Vertex)*(triangles_count+6));
-                    VERTEX_BUFFER_E(x, y, z, xuv+offsetXPerc, yuv+offsetYPerc);
-                    VERTEX_BUFFER_E(x+1, y, z, xuv, yuv+offsetYPerc);
-                    VERTEX_BUFFER_E(x, y+1, z, xuv+offsetXPerc, yuv);
-                    VERTEX_BUFFER_E(x+1, y+1, z, xuv, yuv);
+                    VERTEX_BUFFER_E(x, y, z, xuv+offsetXPerc, yuv+offsetYPerc, 0, 0, -1);
+                    VERTEX_BUFFER_E(x+1, y, z, xuv, yuv+offsetYPerc, 0, 0, -1);
+                    VERTEX_BUFFER_E(x, y+1, z, xuv+offsetXPerc, yuv, 0, 0, -1);
+                    VERTEX_BUFFER_E(x+1, y+1, z, xuv, yuv, 0, 0, -1);
                     // (0,1,0)
                     chunk->triangles_buffer[triangles_count++] = vertex_count + 2 - 4;
                     // (1,1,0)
@@ -166,10 +169,10 @@ void updateChunkVertex(Chunk* chunk){
                     float yuv = voxelYPerc*tilesy_index[5];
                     chunk->vertex_buffer = realloc(chunk->vertex_buffer, sizeof(struct Vertex)*(vertex_count+4));
                     chunk->triangles_buffer = realloc(chunk->triangles_buffer, sizeof(struct Vertex)*(triangles_count+6));
-                    VERTEX_BUFFER_E(x, y, z+1, xuv, yuv+offsetYPerc);
-                    VERTEX_BUFFER_E(x+1, y, z+1, xuv+offsetXPerc, yuv+offsetYPerc);
-                    VERTEX_BUFFER_E(x, y+1, z+1, xuv, yuv);
-                    VERTEX_BUFFER_E(x+1, y+1, z+1, xuv+offsetXPerc, yuv);
+                    VERTEX_BUFFER_E(x, y, z+1, xuv, yuv+offsetYPerc, 0, 0, 1);
+                    VERTEX_BUFFER_E(x+1, y, z+1, xuv+offsetXPerc, yuv+offsetYPerc, 0, 0, 1);
+                    VERTEX_BUFFER_E(x, y+1, z+1, xuv, yuv, 0, 0, 1);
+                    VERTEX_BUFFER_E(x+1, y+1, z+1, xuv+offsetXPerc, yuv, 0, 0, 1);
                     // (0,1,1)
                     chunk->triangles_buffer[triangles_count++] = vertex_count + 2 - 4;
                     // (0,0,1)

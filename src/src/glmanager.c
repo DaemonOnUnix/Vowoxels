@@ -54,14 +54,19 @@ unsigned int bindShader(){
     const char *vertexShaderSource = "#version 420 core\n"
     "layout (location = 0) in vec3 aPos;\n"
     "layout (location = 1) in vec2 textCoord;\n"
+    "layout (location = 2) in vec3 normal;\n"
 	"uniform mat4 model;\n"
 	"uniform mat4 view;\n"
 	"uniform mat4 projection;\n"
-	"out vec2 TexCoord;"
+	"out vec2 TexCoord;\n"
+	"out vec3 FragPos;\n"
+	"out vec3 Normal;\n"
     "void main()\n"
     "{\n"
     "   gl_Position = projection * view * model * vec4(aPos, 1.0);\n"
+	"   FragPos = vec3(model * vec4(aPos, 1.0));"
 	"	TexCoord = textCoord;\n"
+	"	Normal = normal;\n"
     "}\n";
 
 	unsigned int vertexShader;
@@ -81,11 +86,22 @@ unsigned int bindShader(){
 
 	const char* fragmentShaderSource  = "#version 420 core\n"
 	"uniform sampler2D sampler;\n"
+	"uniform vec3 lightPos;\n"
 	"out vec4 FragColor;\n"
-	"in vec2 TexCoord;"
+	"in vec2 TexCoord;\n"
+	"in vec3 FragPos;\n"
+	"in vec3 Normal;\n"
+	"vec3 lightColor = vec3(1,1,1);\n"
 	"void main()\n"
 	"{\n"
-	"    FragColor = texture(sampler, TexCoord);\n"
+	"	 float ambientStrength = 0.1;\n"
+    " 	 vec3 ambient = ambientStrength * lightColor;\n"
+	"	 vec3 norm = normalize(Normal);\n"
+	"	 vec3 lightDir = normalize(lightPos - FragPos);\n"
+	"    float diff = max(dot(norm, lightDir), 0.0);\n"
+	"    vec3 diffuse = diff * lightColor;\n"
+	"	 vec3 result = (ambient + diffuse);\n"
+	"    FragColor = texture(sampler, TexCoord) * vec4(result,0);\n"
 	"}\n";
 
 	unsigned int fragmentShader;
@@ -198,7 +214,11 @@ void drawLoop(){
 	float deltaTime = 0.0f; // Time between current frame and last frame
 	float lastFrame = 0.0f; // Time of last frame
 
+	int viewLoc = glGetUniformLocation(data->shaderProgram, "view");
+	int projectionLoc = glGetUniformLocation(data->shaderProgram, "projection");
+	int lightPos = glGetUniformLocation(data->shaderProgram, "lightPos");
 	while (!glfwWindowShouldClose(data->window)){
+		Vec3 light = vec3$(10000000.0f * cos(glfwGetTime()*0.1f), 10000000.0f * sin(glfwGetTime()*0.1f), data->camera->cameraPos.z);
         glClearColor(0.0353f, 0.6941f, 0.9254f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -217,10 +237,9 @@ void drawLoop(){
         Mat4 view = mat4_lookAt(data->camera->cameraPos, vec3_sub(data->camera->cameraPos, data->camera->cameraFront), data->camera->cameraUp);
 		Mat4 projection;
 		projection = mat4_perspective(to_radians(45.0f), (float)data->width / (float)data->height, 0.1f, 100.0f);
-		int viewLoc = glGetUniformLocation(data->shaderProgram, "view");
-		int projectionLoc = glGetUniformLocation(data->shaderProgram, "projection");
 		glUniformMatrix4fv(viewLoc, 1, GL_FALSE, view.data);
 		glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, projection.data);
+		glUniform3f(lightPos, light.x, light.y, light.z);
 
 		tests(data->window);
 		pthread_rwlock_rdlock(&data->chunkM->chunkslock);
