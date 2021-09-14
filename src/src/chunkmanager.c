@@ -24,57 +24,6 @@ Chunk_manager* initChunkManager(){
 
 #define abs(x) (((x) >= 0) ? (x) : (x)*(-1))
 
-void insertChunkToChunklist(Chunk *chunk){
-    EngineData* data = getEngineData();
-
-    // Malloc new node
-    struct chunk_list* new_chunk_list = malloc(sizeof(struct chunk_list));
-    new_chunk_list->chunk = chunk;
-    new_chunk_list->next = NULL;
-
-    // Add to the start of the list
-    pthread_rwlock_wrlock(&data->chunkM->chunkslock);
-    if(data->chunkM->chunks){
-        new_chunk_list->next = data->chunkM->chunks;
-    }
-    data->chunkM->chunks = new_chunk_list;
-    pthread_rwlock_unlock(&data->chunkM->chunkslock);
-    return;
-}
-
-Chunk* deleteNextChunklist(struct chunk_list* ch_list_prev){
-    EngineData* data = getEngineData();
-    struct chunk_list* deleted_chunk_list = NULL;
-    Chunk* chunk_to_return = NULL;
-    pthread_rwlock_wrlock(&data->chunkM->chunkslock);
-
-    // Take deleted chunk list
-    if(!ch_list_prev){
-        if(!data->chunkM->chunks)
-            return NULL;
-        // Delete the first one
-        deleted_chunk_list = data->chunkM->chunks;
-        // Skip deleted value
-        data->chunkM->chunks = data->chunkM->chunks->next;
-    }else
-    {
-        // Delete the next to ch_list_prev
-        deleted_chunk_list = ch_list_prev->next;
-        // Skip deleted value
-        ch_list_prev->next = ch_list_prev->next->next;
-    }
-
-    // Keep his chunk
-    chunk_to_return = deleted_chunk_list->chunk;   
-
-    // Destroy link to the list
-    deleted_chunk_list->next = NULL;
-    free(deleted_chunk_list);
-
-    pthread_rwlock_unlock(&data->chunkM->chunkslock);
-    return chunk_to_return;
-}
-
 void removeChunks(){
     EngineData* data = getEngineData();
     int howmany = 0;
@@ -138,87 +87,6 @@ void updateChunks(Vec3 camera_pos){
     }
 }
 
-#include <time.h>
-void updateCoord(int* dir, int32_t* x, int32_t* y, int32_t* z, int32_t camx, int32_t camy, int32_t camz){
-    UNUSED(camy);
-    if(*y<0){
-        LOG_INFO("UNDER THE MAP")
-        *dir = 5;
-    }
-    switch (*dir)
-    {
-    case 0:
-        (*y) = camy+VIEW_DIST;
-        (*x)++;
-        (*dir)++;
-        break;
-    case 1:
-        (*y)--;
-        if(*y<=0){
-            (*y) = camy+VIEW_DIST;
-            (*dir)++;
-        }
-        break;
-    case 2:
-        if((*y) == 0){
-            (*y) = camy+VIEW_DIST;
-            (*z)++;
-            if (*z - camz == *x - camx)
-                (*dir)++;
-        }else{
-            (*y)--;
-        }
-        break;
-    case 3:
-        if((*y) == 0){
-            (*y) = camy+VIEW_DIST;
-            (*x)--;
-            if (*x - camx == -(*z - camz))
-                (*dir)++;
-        }else{
-            (*y)--;
-        }
-        break;
-    case 4:
-        if((*y) == 0){
-            (*y) = camy+VIEW_DIST;
-            (*z)--;
-            if (*x - camx == *z - camz)
-                (*dir)++;
-        }else{
-            (*y)--;
-        }
-        break;
-    case 5:
-        if((*y) == 0){
-            (*y) = camy+VIEW_DIST;
-            (*x)++;
-            if (*x - camx == -(*z - camz))
-                (*dir)++;
-        }else{
-            (*y)--;
-        }
-        break;
-    case 6:
-        (*y)--;
-        if((*y) == 0){
-            if(VIEW_DIST > *x - camx)
-                (*dir)=0;
-            else
-                (*dir)++;
-        }
-        break;
-    case 7:
-        LOG_INFO("Finish to load all CHUNKS")
-        while(!__sync_bool_compare_and_swap(&(data->chunkM->need_update), 1, 2));
-        __sync_synchronize();
-        break;
-    default:
-        PANIC("How did you get there ?");
-        break;
-    }
-    LOG_INFO("Updating Coord x: %i; y: %i; z: %i, dir: %i", *x, *y, *z, *dir)
-}
 
 void* thread_loading_chunks(void *args){
     EngineData* data = getEngineData();
@@ -234,6 +102,8 @@ void* thread_loading_chunks(void *args){
     int32_t camy = data->chunkM->actual_chunk_y;
     int32_t camz = data->chunkM->actual_chunk_z;
     set_lock_chunk_manager_pos();
+
+    setSEED(rand());
 
     while (1)
     {
@@ -282,10 +152,13 @@ void* thread_loading_chunks(void *args){
             {
                 for (size_t _z = 0; _z < CHUNK_DIMENSION; _z++)
                 {
-                    float p = perlin2d((float)x*CHUNK_DIMENSION + _x,(float)z*CHUNK_DIMENSION + _z, 0.01, 4);
-                    
-                    float h = mapfloat(p, 0.0f, 1.0f, 0.0f, MAX_HEIGHT);
-                    for (size_t _y = 0; _y < CHUNK_DIMENSION && y*CHUNK_DIMENSION+_y < h; _y++)
+                    int lx = _x;
+                    int lz = _z;
+                    float p = perlin2d((float)x*CHUNK_DIMENSION + lx,(float)z*CHUNK_DIMENSION + lz, 0.01, 3);
+                    if(p>1.0f)
+                        p = 1.0f;
+                    float h = floorf(mapfloat(p, 0.0f, 1.0f, 0.0f, MAX_HEIGHT));
+                    for (size_t _y = 0; _y < CHUNK_DIMENSION && ((y*CHUNK_DIMENSION)+_y < h); _y++)
                     {
                         chunk->voxel_list[INDEX_TO_CHUNK(_x, _y, _z)] = 1;
                     }

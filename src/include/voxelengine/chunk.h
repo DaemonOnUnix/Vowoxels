@@ -59,7 +59,7 @@ typedef struct {
 #define INDEX_TO_CHUNK(x, y, z) ((x) + ((CHUNK_DIMENSION) * (y)) + ((CHUNK_DIMENSION) * (CHUNK_DIMENSION) * (z)))
 Chunk* newChunk(int32_t chunk_x, int32_t chunk_y, int32_t chunk_z);
 unsigned char saveChunkToFile(Chunk* chunk, char* dir);
-char* create_filename(char* dir, int32_t chunk_x, int32_t chunk_y, int32_t chunk_z);
+char* create_chunk_filename(char* dir, int32_t chunk_x, int32_t chunk_y, int32_t chunk_z);
 Chunk* loadChunkFromFile(char* dir, int32_t chunk_x, int32_t chunk_y, int32_t chunk_z);
 void updateChunkVertex(Chunk* chunk);
 void updateChunk(Chunk* chunk);
