@@ -2,6 +2,7 @@
 #include "voxelengine/chunk.h"
 #include "voxelengine/data.h"
 #include "voxelengine/chunkmanager.h"
+#include "linear_algebra/perlinnoise.h"
 
 void updateCoord(int* dir, int32_t* x, int32_t* y, int32_t* z, int32_t camx, int32_t camy, int32_t camz){
     EngineData* data = getEngineData();
@@ -83,4 +84,31 @@ void updateCoord(int* dir, int32_t* x, int32_t* y, int32_t* z, int32_t camx, int
         break;
     }
     LOG_INFO("Updating Coord x: %i; y: %i; z: %i, dir: %i", *x, *y, *z, *dir)
+}
+
+Chunk* generateChunk(int32_t x, int32_t y, int32_t z){
+    Chunk* chunk = newChunk(x, y, z);
+    for (size_t _x = 0; _x < CHUNK_DIMENSION; _x++)
+    {
+        for (size_t _z = 0; _z < CHUNK_DIMENSION; _z++)
+        {
+            int lx = _x;
+            int lz = _z;
+            float p = perlin2d((float)x*CHUNK_DIMENSION + lx,(float)z*CHUNK_DIMENSION + lz, 0.01, 3);
+            if(p>1.0f)
+                p = 1.0f;
+            float h = floorf(mapfloat(p, 0.0f, 1.0f, 0.0f, MAX_HEIGHT));
+            for (size_t _y = 0; _y < CHUNK_DIMENSION && ((y*CHUNK_DIMENSION)+_y < h); _y++)
+            {
+                chunk->voxel_list[INDEX_TO_CHUNK(_x, _y, _z)] = 1;
+                if ((y*CHUNK_DIMENSION)+_y < h-1)
+                    chunk->voxel_list[INDEX_TO_CHUNK(_x, _y, _z)] = 2;
+                if ((y*CHUNK_DIMENSION)+_y < h-5)
+                    chunk->voxel_list[INDEX_TO_CHUNK(_x, _y, _z)] = 3;
+            }
+            
+        }
+        
+    }
+    return chunk;
 }

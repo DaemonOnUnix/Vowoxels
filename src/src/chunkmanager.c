@@ -2,7 +2,6 @@
 #include "pthread/locks.h"
 #include "voxelengine/data.h"
 #include "metaprog/utils.h"
-#include "linear_algebra/perlinnoise.h"
 
 CREATE_COMMON(chunk_manager_pos);
 
@@ -145,27 +144,7 @@ void* thread_loading_chunks(void *args){
         
         // Failed to load existing chunk
         if(!chunk){
-            // TODO: Generate Chunk
-            // TEST CHUNK
-            chunk = newChunk(x, y, z);
-            for (size_t _x = 0; _x < CHUNK_DIMENSION; _x++)
-            {
-                for (size_t _z = 0; _z < CHUNK_DIMENSION; _z++)
-                {
-                    int lx = _x;
-                    int lz = _z;
-                    float p = perlin2d((float)x*CHUNK_DIMENSION + lx,(float)z*CHUNK_DIMENSION + lz, 0.01, 3);
-                    if(p>1.0f)
-                        p = 1.0f;
-                    float h = floorf(mapfloat(p, 0.0f, 1.0f, 0.0f, MAX_HEIGHT));
-                    for (size_t _y = 0; _y < CHUNK_DIMENSION && ((y*CHUNK_DIMENSION)+_y < h); _y++)
-                    {
-                        chunk->voxel_list[INDEX_TO_CHUNK(_x, _y, _z)] = 1;
-                    }
-                    
-                }
-                
-            }
+            chunk = generateChunk(x, y, z);
         }
 
         // Create mesh

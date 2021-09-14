@@ -46,15 +46,17 @@ void autoGenTileInfo(unsigned int atlasIndex){
     for (unsigned int i = 0; i < atlasIndex; i++) {
         atlas = atlas->next;
     }
-    unsigned int nb_blc = atlas->next->tilex * atlas->next->tiley;
-    atlas->next->tile_info = malloc(sizeof(Tile) * nb_blc);
-    for (size_t id = 0; id < nb_blc; id++) {
-        atlas->next->tile_info[id].id = (unsigned int)(id+1);
-        atlas->next->tile_info[id].facemask = FACE_ALL;
+    for (size_t id = 0; id < atlas->nb_voxels_id; id++) {
+        for (size_t x = 0; x < 6; x++)
+        {
+            atlas->next->tile_info[id].tilex[x] = 0;
+            atlas->next->tile_info[id].tiley[x] = 0;
+        }
+        
     }
 }
 
-unsigned int createAtlas(char* fileName, uint8_t tiles_x,  uint8_t tiles_y, uint8_t offset_x,  uint8_t offset_y, Tile* tile_info){
+unsigned int createAtlas(char* fileName, uint8_t tiles_x,  uint8_t tiles_y, uint8_t offset_x,  uint8_t offset_y, uint32_t nb_voxels_id){
     EngineData* data = getEngineData();
     unsigned int atlasIndex = 0;
     struct Atlas* atlas = data->atlas;
@@ -72,17 +74,56 @@ unsigned int createAtlas(char* fileName, uint8_t tiles_x,  uint8_t tiles_y, uint
     atlas->next->tiley = tiles_y;
     atlas->next->offset_x = offset_x;
     atlas->next->offset_y = offset_y;
-    char isAutoGen[10];
-    memcpy(isAutoGen, "False", 6);
-    if (tile_info)
-        atlas->tile_info = tile_info;
-    else{
-        memcpy(isAutoGen, "True", 5);
-        autoGenTileInfo(atlasIndex);
-    }
-    LOG_OK("Created new atlas:\n\tId: %u\n\tTexture: %s\n\tTiles x: %u\n\tTiles y: %u\n\tOffset x: %u\n\tOffset y: %u\n\tAutoGen: %s", 
-    atlasIndex, fileName, atlas->next->tilex, atlas->next->tiley, atlas->next->offset_x, atlas->next->offset_y, isAutoGen)
+    atlas->next->nb_voxels_id = nb_voxels_id;
+    atlas->next->tile_info = malloc(sizeof(Tile) * nb_voxels_id);
+    autoGenTileInfo(atlasIndex);
+    LOG_OK("Created new atlas:\n\tId: %u\n\tTexture: %s\n\tTiles x: %u\n\tTiles y: %u\n\tOffset x: %u\n\tOffset y: %u", 
+    atlasIndex, fileName, atlas->next->tilex, atlas->next->tiley, atlas->next->offset_x, atlas->next->offset_y)
     return atlasIndex;
+}
+
+void setVoxelTileByIndex(unsigned int atlasIndex, uint32_t voxel_id, uint32_t index, unsigned char faces){
+    EngineData* data = getEngineData();
+    struct Atlas* atlas = data->atlas;
+    for (unsigned int i = 0; i <= atlasIndex; i++) {
+        atlas = atlas->next;
+    }
+    if (voxel_id>atlas->nb_voxels_id || index > atlas->tilex * atlas->tiley)
+    {
+        return;
+    }
+    for (size_t i = 0; i < 6; i++)
+    {
+        if (faces & 1<<i)
+        {
+            atlas->tile_info[voxel_id].tilex[i] = index % atlas->tilex;
+            atlas->tile_info[voxel_id].tiley[i] = index / atlas->tiley;
+        }
+        
+    }
+    
+}
+void setVoxelTileByCoord(unsigned int atlasIndex, uint32_t voxel_id, uint8_t tilex, uint8_t tiley, unsigned char faces){
+    
+    EngineData* data = getEngineData();
+    struct Atlas* atlas = data->atlas;
+    for (unsigned int i = 0; i <= atlasIndex; i++) {
+        atlas = atlas->next;
+    }
+    if (voxel_id>atlas->nb_voxels_id || tilex > atlas->tilex || tiley > atlas->tiley)
+    {
+        return;
+    }
+    for (size_t i = 0; i < 6; i++)
+    {
+        if (faces & 1<<i)
+        {
+            atlas->tile_info[voxel_id].tilex[i] = tilex;
+            atlas->tile_info[voxel_id].tiley[i] = tiley;
+        }
+        
+    }
+    
 }
 
 void loadTexture(char* fileName, struct Atlas* atlas){

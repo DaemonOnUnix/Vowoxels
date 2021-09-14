@@ -67,6 +67,6 @@ Chunk* loadChunkFromFile(char* dir, int32_t chunk_x, int32_t chunk_y, int32_t ch
 void updateChunkVertex(Chunk* chunk);
 void updateChunk(Chunk* chunk);
 void freeChunk(Chunk* chunk);
-
+Chunk* generateChunk(int32_t x, int32_t y, int32_t z);
 
 #endif

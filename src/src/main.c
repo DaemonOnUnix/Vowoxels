@@ -37,14 +37,12 @@ int main() {
 	data->shaderProgram = bindShader();
     
     // Texture
-    createAtlas("testres/terrain.png", 16, 16, 0, 0, NULL);
-    data->atlas->next->tile_info[0].id = 2;
-    data->atlas->next->tile_info[3].id = 1;
-    data->atlas->next->tile_info[3].facemask = FACE_SIDES;
-    data->atlas->next->tile_info[191].id = 1;
-    data->atlas->next->tile_info[191].facemask = FACE_UP;
-    data->atlas->next->tile_info[2].id = 1;
-    data->atlas->next->tile_info[2].facemask = FACE_DOWN;
+    unsigned int atlasnb = createAtlas("testres/terrain.png", 16, 16, 0, 0, 3);
+    setVoxelTileByIndex(atlasnb, 1, 3, FACE_SIDES);
+    setVoxelTileByIndex(atlasnb, 1, 191, FACE_UP);
+    setVoxelTileByIndex(atlasnb, 1, 2, FACE_DOWN);
+    setVoxelTileByIndex(atlasnb, 2, 2, FACE_ALL);
+    setVoxelTileByIndex(atlasnb, 3, 1, FACE_ALL);
 
     data->chunkM = initChunkManager();
 

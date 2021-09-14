@@ -7,7 +7,7 @@
 #include <pthread.h>
 #include <stdatomic.h>
 
-#define VIEW_DIST 10
+#define VIEW_DIST 1
 
 typedef struct {
     int64_t actual_chunk_x;

@@ -23,8 +23,8 @@ typedef struct
 
 typedef struct
 {
-    uint32_t id;
-    uint8_t facemask;
+    uint8_t tilex[6];
+    uint8_t tiley[6];
 } Tile;
 
 
@@ -35,12 +35,14 @@ struct Atlas
     uint8_t tiley;
     uint8_t offset_x;
     uint8_t offset_y;
+    uint32_t nb_voxels_id;
     Tile* tile_info;
     struct Atlas* next;
 };
 
 // Return Atlas ID
-unsigned int createAtlas(char* fileName, uint8_t tiles_x,  uint8_t tiles_y, uint8_t offset_x, uint8_t offset_y, Tile* tile_info);
+unsigned int createAtlas(char* fileName, uint8_t tiles_x,  uint8_t tiles_y, uint8_t offset_x, uint8_t offset_y, uint32_t nb_voxels_id);
 void loadTexture(char* fileName, struct Atlas*);
-
+void setVoxelTileByIndex(unsigned int atlasIndex, uint32_t voxel_id, uint32_t index, unsigned char faces);
+void setVoxelTileByCoord(unsigned int atlasIndex, uint32_t voxel_id, uint8_t tilex, uint8_t tiley, unsigned char faces);
 #endif
