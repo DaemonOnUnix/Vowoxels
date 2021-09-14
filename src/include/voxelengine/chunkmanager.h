@@ -7,7 +7,7 @@
 #include <pthread.h>
 #include <stdatomic.h>
 
-#define VIEW_DIST 2
+#define VIEW_DIST 6
 
 typedef struct {
     int64_t actual_chunk_x;
@@ -30,5 +30,7 @@ Chunk_manager* initChunkManager();
 void updateChunks(Vec3 camera_pos);
 
 void* thread_loading_chunks(void *args);
+
+Chunk* deleteNextChunklist(struct chunk_list* ch_list_prev);
 
 #endif

@@ -50,10 +50,12 @@ Chunk* deleteNextChunklist(struct chunk_list* ch_list_prev){
 
     // Take deleted chunk list
     if(!ch_list_prev){
+        if(!data->chunkM->chunks)
+            return NULL;
         // Delete the first one
         deleted_chunk_list = data->chunkM->chunks;
         // Skip deleted value
-        data->chunkM->chunks = deleted_chunk_list->next;
+        data->chunkM->chunks = data->chunkM->chunks->next;
     }else
     {
         // Delete the next to ch_list_prev
@@ -130,7 +132,8 @@ void updateChunks(Vec3 camera_pos){
         smartstr pogstr pikalul = string("", 40 );
         sprintf(pikalul, "x: %li; y: %li; z: %li", data->chunkM->actual_chunk_x, data->chunkM->actual_chunk_y, data->chunkM->actual_chunk_z);
         glfwSetWindowTitle(data->window, pikalul);
-        //removeChunks();
+        if (!data->chunkM->need_update)
+            removeChunks();
         data->chunkM->need_update = 1;
     }
 }
@@ -138,7 +141,6 @@ void updateChunks(Vec3 camera_pos){
 #include <time.h>
 void updateCoord(int* dir, int32_t* x, int32_t* y, int32_t* z, int32_t camx, int32_t camy, int32_t camz){
     UNUSED(camy);
-    sleep(1);
     if(*y<0){
         LOG_INFO("UNDER THE MAP")
         *dir = 5;

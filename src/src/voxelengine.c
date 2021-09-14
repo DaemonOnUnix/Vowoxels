@@ -42,6 +42,8 @@ Chunk* newChunk(int32_t chunk_x, int32_t chunk_y, int32_t chunk_z){
 }
 
 void freeChunk(Chunk* chunk){
+    if (!chunk)
+        return;
     if(chunk->VAO){
         glDeleteVertexArrays(1, &chunk->VAO);
         glDeleteBuffers(2, chunk->VBO);
