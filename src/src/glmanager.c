@@ -19,7 +19,7 @@ float lastX = 400;
 float lastY = 300;
 float yaw;
 float pitch;
-float mouseSpeed = 200.0f;
+float mouseSpeed = 20.0f;
 
 GLFWwindow* glinit(){
 	EngineData* data = getEngineData();
@@ -134,6 +134,10 @@ void processInput(float deltaTime){
 		data->camera->cameraPos = vec3_sub(data->camera->cameraPos, vec3_mul_val(vec3_unit(vec3_cross(data->camera->cameraFront, data->camera->cameraUp)), cameraSpeed));
 	if (glfwGetKey(data->window, GLFW_KEY_D) == GLFW_PRESS)
 		data->camera->cameraPos = vec3_add(data->camera->cameraPos, vec3_mul_val(vec3_unit(vec3_cross(data->camera->cameraFront, data->camera->cameraUp)), cameraSpeed));
+	if (glfwGetKey(data->window, GLFW_KEY_SPACE) == GLFW_PRESS)
+		data->camera->cameraPos = vec3_add(data->camera->cameraPos, vec3_mul_val(data->camera->cameraUp, cameraSpeed));
+	if (glfwGetKey(data->window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS)
+		data->camera->cameraPos = vec3_sub(data->camera->cameraPos, vec3_mul_val(data->camera->cameraUp, cameraSpeed));
 	if (glfwGetKey(data->window, GLFW_KEY_ESCAPE)){
 		glfwSetInputMode(data->window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
 		mouseEnabled = false;
