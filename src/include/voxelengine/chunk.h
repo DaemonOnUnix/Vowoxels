@@ -69,4 +69,5 @@ void updateChunk(Chunk* chunk);
 void freeChunk(Chunk* chunk);
 Chunk* generateChunk(int32_t x, int32_t y, int32_t z);
 
+
 #endif

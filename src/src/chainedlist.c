@@ -52,3 +52,21 @@ Chunk* deleteNextChunklist(struct chunk_list* ch_list_prev){
     pthread_rwlock_unlock(&data->chunkM->chunkslock);
     return chunk_to_return;
 }
+
+Chunk* getChunk(int32_t x, int32_t y, int32_t z){
+    EngineData* data = getEngineData();
+    Chunk* chunk_to_return = NULL;
+
+
+    pthread_rwlock_rdlock(&data->chunkM->chunkslock);
+    for (struct chunk_list* chnk = data->chunkM->chunks; chnk != NULL && chunk_to_return == NULL; chnk = chnk->next) {
+        if (x == chnk->chunk->chunk_x && y == chnk->chunk->chunk_y && z == chnk->chunk->chunk_z)
+        {
+            chunk_to_return = chnk->chunk;
+        }
+        
+    }
+    pthread_rwlock_unlock(&data->chunkM->chunkslock);
+
+    return chunk_to_return;
+}

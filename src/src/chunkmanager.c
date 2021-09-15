@@ -79,7 +79,16 @@ void updateChunks(Vec3 camera_pos){
         data->chunkM->actual_chunk_y = ((int64_t)camera_pos.y)/CHUNK_DIMENSION;
         data->chunkM->actual_chunk_z = ((int64_t)camera_pos.z)/CHUNK_DIMENSION;
         smartstr pogstr pikalul = string("", 40 );
-        sprintf(pikalul, "x: %li; y: %li; z: %li", data->chunkM->actual_chunk_x, data->chunkM->actual_chunk_y, data->chunkM->actual_chunk_z);
+        int64_t nbchunks = 0;
+
+        // DEBUG
+        pthread_rwlock_rdlock(&data->chunkM->chunkslock);
+        for (struct chunk_list* chnk = data->chunkM->chunks; chnk != NULL; chnk = chnk->next) {
+            nbchunks++;
+        }
+        pthread_rwlock_unlock(&data->chunkM->chunkslock);
+
+        sprintf(pikalul, "x: %li; y: %li; z: %li   Chunks: %li", data->chunkM->actual_chunk_x, data->chunkM->actual_chunk_y, data->chunkM->actual_chunk_z, nbchunks);
         glfwSetWindowTitle(data->window, pikalul);
         if (!data->chunkM->need_update)
             removeChunks();

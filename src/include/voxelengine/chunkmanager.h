@@ -33,6 +33,7 @@ void* thread_loading_chunks(void *args);
 
 void insertChunkToChunklist(Chunk *chunk);
 Chunk* deleteNextChunklist(struct chunk_list* ch_list_prev);
+Chunk* getChunk(int32_t x, int32_t y, int32_t z);
 
 void updateCoord(int* dir, int32_t* x, int32_t* y, int32_t* z, int32_t camx, int32_t camy, int32_t camz);
 
