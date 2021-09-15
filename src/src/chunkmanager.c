@@ -2,6 +2,8 @@
 #include "pthread/locks.h"
 #include "voxelengine/data.h"
 #include "metaprog/utils.h"
+#include "collections/string.h"
+#include "linear_algebra/perlinnoise.h"
 
 CREATE_COMMON(chunk_manager_pos);
 
@@ -63,7 +65,6 @@ void removeChunks(){
     pthread_rwlock_unlock(&data->chunkM->chunkslock);
     LOG_INFO("%u freed on %u!", howmany, howmany2)
 }
-#include "collections/string.h"
 
 void updateChunks(Vec3 camera_pos){
     EngineData* data = getEngineData();
@@ -102,6 +103,7 @@ void* thread_loading_chunks(void *args){
     int32_t camz = data->chunkM->actual_chunk_z;
     set_lock_chunk_manager_pos();
 
+    srand( time( NULL ) );
     setSEED(rand());
 
     while (1)

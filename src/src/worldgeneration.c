@@ -94,15 +94,18 @@ Chunk* generateChunk(int32_t x, int32_t y, int32_t z){
         {
             int lx = _x;
             int lz = _z;
-            float p = perlin2d((float)x*CHUNK_DIMENSION + lx,(float)z*CHUNK_DIMENSION + lz, 0.01, 3);
+            float p = perlin2d((float)x*CHUNK_DIMENSION + lx,(float)z*CHUNK_DIMENSION + lz, 0.01, 4);
             if(p>1.0f)
                 p = 1.0f;
             float h = floorf(mapfloat(p, 0.0f, 1.0f, 0.0f, MAX_HEIGHT));
             for (size_t _y = 0; _y < CHUNK_DIMENSION && ((y*CHUNK_DIMENSION)+_y < h); _y++)
             {
+                // GRASS
                 chunk->voxel_list[INDEX_TO_CHUNK(_x, _y, _z)] = 1;
+                // DIRT
                 if ((y*CHUNK_DIMENSION)+_y < h-1)
                     chunk->voxel_list[INDEX_TO_CHUNK(_x, _y, _z)] = 2;
+                // STONE
                 if ((y*CHUNK_DIMENSION)+_y < h-5)
                     chunk->voxel_list[INDEX_TO_CHUNK(_x, _y, _z)] = 3;
             }

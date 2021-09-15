@@ -86,20 +86,20 @@ unsigned int bindShader(){
 
 	const char* fragmentShaderSource  = "#version 420 core\n"
 	"uniform sampler2D sampler;\n"
-	"uniform vec3 lightPos;\n"
+	"uniform vec3 skyLightDir;\n"
 	"out vec4 FragColor;\n"
 	"in vec2 TexCoord;\n"
 	"in vec3 FragPos;\n"
 	"in vec3 Normal;\n"
-	"vec3 lightColor = vec3(1,1,1);\n"
+	"vec3 skyLightColor = vec3(1,1,1);\n"
 	"void main()\n"
 	"{\n"
-	"	 float ambientStrength = 0.1;\n"
-    " 	 vec3 ambient = ambientStrength * lightColor;\n"
+	"	 float ambientStrength = 0.5;\n"
+    " 	 vec3 ambient = ambientStrength * skyLightColor;\n"
 	"	 vec3 norm = normalize(Normal);\n"
-	"	 vec3 lightDir = normalize(lightPos - FragPos);\n"
+	"	 vec3 lightDir = normalize(-skyLightDir);\n"
 	"    float diff = max(dot(norm, lightDir), 0.0);\n"
-	"    vec3 diffuse = diff * lightColor;\n"
+	"    vec3 diffuse = diff * skyLightColor;\n"
 	"	 vec3 result = (ambient + diffuse);\n"
 	"    FragColor = texture(sampler, TexCoord) * vec4(result,0);\n"
 	"}\n";
@@ -134,7 +134,7 @@ Camera* initCamera(Vec3 cameraPos, Vec3 cameraFront, Vec3 cameraUp){
 	cam->cameraPos   = cameraPos;
 	cam->cameraFront = cameraFront;
 	cam->cameraUp    = cameraUp;
-	cam->cameraSpeed = 10.0f;
+	cam->cameraSpeed = 100.0f;
 	return cam;
 }
 
@@ -216,9 +216,9 @@ void drawLoop(){
 
 	int viewLoc = glGetUniformLocation(data->shaderProgram, "view");
 	int projectionLoc = glGetUniformLocation(data->shaderProgram, "projection");
-	int lightPos = glGetUniformLocation(data->shaderProgram, "lightPos");
+	int lightPos = glGetUniformLocation(data->shaderProgram, "skyLightDir");
 	while (!glfwWindowShouldClose(data->window)){
-		Vec3 light = vec3$(10000000.0f * cos(glfwGetTime()*0.1f), 10000000.0f * sin(glfwGetTime()*0.1f), data->camera->cameraPos.z);
+		Vec3 light = vec3$(-0.2f, -1.0f, -0.3f);
         glClearColor(0.0353f, 0.6941f, 0.9254f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -236,7 +236,7 @@ void drawLoop(){
 		// Le cube
         Mat4 view = mat4_lookAt(data->camera->cameraPos, vec3_sub(data->camera->cameraPos, data->camera->cameraFront), data->camera->cameraUp);
 		Mat4 projection;
-		projection = mat4_perspective(to_radians(45.0f), (float)data->width / (float)data->height, 0.1f, 100.0f);
+		projection = mat4_perspective(to_radians(45.0f), (float)data->width / (float)data->height, 0.1f, 10000.0f);
 		glUniformMatrix4fv(viewLoc, 1, GL_FALSE, view.data);
 		glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, projection.data);
 		glUniform3f(lightPos, light.x, light.y, light.z);
