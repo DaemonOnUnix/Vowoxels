@@ -1,75 +1,77 @@
+#include <stdint.h>
 #include <stdio.h>
 #include "linear_algebra/perlinnoise.h"
+#include <stdlib.h>
+
 static int SEED = 0;
-
-#define WORLD_SIZE 256
-
-static int hash[] = {208,34,231,213,32,248,233,56,161,78,24,140,71,48,140,254,245,255,247,247,40,
-                     185,248,251,245,28,124,204,204,76,36,1,107,28,234,163,202,224,245,128,167,204,
-                     9,92,217,54,239,174,173,102,193,189,190,121,100,108,167,44,43,77,180,204,8,81,
-                     70,223,11,38,24,254,210,210,177,32,81,195,243,125,8,169,112,32,97,53,195,13,
-                     203,9,47,104,125,117,114,124,165,203,181,235,193,206,70,180,174,0,167,181,41,
-                     164,30,116,127,198,245,146,87,224,149,206,57,4,192,210,65,210,129,240,178,105,
-                     228,108,245,148,140,40,35,195,38,58,65,207,215,253,65,85,208,76,62,3,237,55,89,
-                     232,50,217,64,244,157,199,121,252,90,17,212,203,149,152,140,187,234,177,73,174,
-                     193,100,192,143,97,53,145,135,19,103,13,90,135,151,199,91,239,247,33,39,145,
-                     101,120,99,3,186,86,99,41,237,203,111,79,220,135,158,42,30,154,120,67,87,167,
-                     135,176,183,191,253,115,184,21,233,58,129,233,142,39,128,211,118,137,139,255,
-                     114,20,218,113,154,27,127,246,250,1,8,198,250,209,92,222,173,21,88,102,219};
-
+static float poids[WORLD_SIZE][WORLD_SIZE][2];
 void setSEED(int seed){
     SEED = seed;
+    srand(SEED);
+
+    for (size_t x = 0; x < WORLD_SIZE; x++)
+    {
+        for (size_t y = 0; y < WORLD_SIZE; y++)
+        {
+            switch (rand()%3)
+            {
+            case 0:
+                poids[x][y][0] = 1.0f;
+                poids[x][y][1] = 1.0f;
+                break;
+            case 1:
+                poids[x][y][0] = -1.0f;
+                poids[x][y][1] = 1.0f;
+                break;
+            case 2:
+                poids[x][y][0] = -1.0f;
+                poids[x][y][1] = -1.0f;
+                break;
+            default:
+                poids[x][y][0] = 1.0f;
+                poids[x][y][1] = -1.0f;
+                break;
+            }
+        }
+    }
+    
     return;
 }
 
-int noise2(int x, int y)
-{
-    int tmp = hash[(y + SEED) % 256];
-    return hash[(tmp + x) % 256];
+float dotGradient(int32_t gridX, int32_t gridY, int32_t x, int32_t y){
+    int32_t vecX = x - gridX;
+    int32_t vecY = y - gridY;
+    return vecX * poids[gridX][gridY][0] + vecY * poids[gridX][gridY][1];
 }
 
-float lin_inter(float x, float y, float s)
-{
-    return x + s * (y-x);
+float fade(float t){
+    return ((6*t - 15)*t + 10)*t*t*t;
 }
 
-float smooth_inter(float x, float y, float s)
-{
-    return lin_inter(x, y, s * s * (3-2*s));
+float lerp(float a0, float a1, float w){
+    return (1.0f - w)*a0 + w*a1;
 }
 
-float noise2d(float x, float y)
-{
-    int x_int = x;
-    int y_int = y;
-    float x_frac = x - x_int;
-    float y_frac = y - y_int;
-    int s = noise2(x_int, y_int);
-    int t = noise2(x_int+1, y_int);
-    int u = noise2(x_int, y_int+1);
-    int v = noise2(x_int+1, y_int+1);
-    float low = smooth_inter(s, t, x_frac);
-    float high = smooth_inter(u, v, x_frac);
-    return smooth_inter(low, high, y_frac);
-}
+float noise2d(float x, float y){
+    // X and Y MUST BE BETWEEN 0 WORLDSIZE
+    if (x < 0)
+        x = WORLD_SIZE + x;
+    if (y < 0)
+        y = WORLD_SIZE + y;
+    
+    float x0 = floorf(x);
+    float x1 = x0 + 1;
+    float y0 = floorf(y);
+    float y1 = y0 + 1;
 
-float perlin2d(float x, float y, float freq, int depth)
-{
-    float xa = x*freq;
-    float ya = y*freq;
-    float amp = 1.0;
-    float fin = 0;
-    float div = 0.0;
+    float sx = x - x0;
+    float sy = y - y0;
 
-    int i;
-    for(i=0; i<depth; i++)
-    {
-        div += 256 * amp;
-        fin += noise2d(xa, ya) * amp;
-        amp /= 2;
-        xa *= 2;
-        ya *= 2;
-    }
-
-    return fin/div;
+    float n0 = dotGradient(x0, y0, x, y);
+    float n1 = dotGradient(x1, y0, x, y);
+    float ix0 = lerp(n0, n1, fade(sx));
+    n0 = dotGradient(x0, y1, x, y);
+    n1 = dotGradient(x1, y1, x, y);
+    float ix1 = lerp(n0, n1, fade(sx));
+    return lerp(ix0, ix1, fade(sy));
 }

@@ -6,7 +6,6 @@
 
 void updateCoord(int* dir, int32_t* x, int32_t* y, int32_t* z, int32_t camx, int32_t camy, int32_t camz){
     EngineData* data = getEngineData();
-    UNUSED(camy);
     if(*y<0){
         LOG_INFO("UNDER THE MAP")
         *dir = 5;
@@ -90,23 +89,25 @@ Chunk* generateChunk(int32_t x, int32_t y, int32_t z){
     Chunk* chunk = newChunk(x, y, z);
     for (size_t _x = 0; _x < CHUNK_DIMENSION; _x++)
     {
+        float lx = ((float)(_x+0.5f)/(float)CHUNK_DIMENSION) + (x+(WORLD_SIZE/2));
         for (size_t _z = 0; _z < CHUNK_DIMENSION; _z++)
         {
-            int lx = _x;
-            int lz = _z;
-            float p = perlin2d((float)x*CHUNK_DIMENSION + lx,(float)z*CHUNK_DIMENSION + lz, 0.01, 4);
-            if(p>1.0f)
-                p = 1.0f;
-            float h = floorf(mapfloat(p, 0.0f, 1.0f, 0.0f, MAX_HEIGHT));
-            for (size_t _y = 0; _y < CHUNK_DIMENSION && ((y*CHUNK_DIMENSION)+_y < h); _y++)
+            float lz = ((float)(_z+0.5f)/(float)CHUNK_DIMENSION) + (z+(WORLD_SIZE/2));
+            float p = noise2d(lx, lz);
+            p = floorf(p * MAX_HEIGHT);
+            if (p < 0)
+                p *= -1;
+            if(p > MAX_HEIGHT)
+                p = MAX_HEIGHT;
+            for (size_t _y = 0; _y < CHUNK_DIMENSION && ((y*CHUNK_DIMENSION)+_y < p); _y++)
             {
                 // GRASS
                 chunk->voxel_list[INDEX_TO_CHUNK(_x, _y, _z)] = 1;
                 // DIRT
-                if ((y*CHUNK_DIMENSION)+_y < h-1)
+                if ((y*CHUNK_DIMENSION)+_y < p-1)
                     chunk->voxel_list[INDEX_TO_CHUNK(_x, _y, _z)] = 2;
                 // STONE
-                if ((y*CHUNK_DIMENSION)+_y < h-5)
+                if ((y*CHUNK_DIMENSION)+_y < p-5)
                     chunk->voxel_list[INDEX_TO_CHUNK(_x, _y, _z)] = 3;
             }
             

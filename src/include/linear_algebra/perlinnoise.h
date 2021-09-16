@@ -3,6 +3,7 @@
 
 #include <math.h>
 
-float perlin2d(float x, float y, float freq, int depth);
+#define WORLD_SIZE 256
+float noise2d(float x, float y);
 void setSEED(int seed);
 #endif
