@@ -13,7 +13,7 @@ void setSEED(int seed){
     {
         for (size_t y = 0; y < WORLD_SIZE; y++)
         {
-            switch (rand()%3)
+            switch (rand()%4)
             {
             case 0:
                 poids[x][y][0] = 1.0f;
@@ -38,10 +38,10 @@ void setSEED(int seed){
     return;
 }
 
-float dotGradient(int32_t gridX, int32_t gridY, int32_t x, int32_t y){
-    int32_t vecX = x - gridX;
-    int32_t vecY = y - gridY;
-    return vecX * poids[gridX][gridY][0] + vecY * poids[gridX][gridY][1];
+float dotGradient(float gridX, float gridY, float x, float y){
+    float vecX = x - gridX;
+    float vecY = y - gridY;
+    return vecX * poids[(int32_t)gridX][(int32_t)gridY][0] + vecY * poids[(int32_t)gridX][(int32_t)gridY][1];
 }
 
 float fade(float t){
@@ -73,5 +73,9 @@ float noise2d(float x, float y){
     n0 = dotGradient(x0, y1, x, y);
     n1 = dotGradient(x1, y1, x, y);
     float ix1 = lerp(n0, n1, fade(sx));
-    return lerp(ix0, ix1, fade(sy));
+    float value = lerp(ix0, ix1, fade(sy));
+    if(value < 0){
+        return -value;
+    }
+    return value;
 }

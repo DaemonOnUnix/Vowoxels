@@ -27,26 +27,6 @@ EngineData* data;
 #include <SDL_image.h>
 
 int main() {
-    SDL_Surface * image = SDL_CreateRGBSurface(0,256,256,32,0,0,0,0);
-    
-    setSEED(rand());
-    for (float x = 0; x < 256; x++)
-    {
-        for (float y = 0; y < 256; y++){
-            float noise = floorf(noise2d(x/40,y/40)*254);
-            Uint32 pixel = SDL_MapRGB(image->format, noise,noise,noise);
-            SDL_Rect srcrect;
-            srcrect.x = x;
-            srcrect.y = y;
-            srcrect.h = 1;
-            srcrect.w = 1;
-            SDL_FillRect(image, &srcrect, pixel);
-        }
-
-    }
-    
-    SDL_SaveBMP(image, "image.bmp");
-    return 0;
     data = malloc(sizeof(EngineData));
     data->atlas = malloc(sizeof(struct Atlas));
     data->atlas->next = NULL;

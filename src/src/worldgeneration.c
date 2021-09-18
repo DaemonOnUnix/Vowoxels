@@ -94,9 +94,7 @@ Chunk* generateChunk(int32_t x, int32_t y, int32_t z){
         {
             float lz = ((float)(_z+0.5f)/(float)CHUNK_DIMENSION) + (z+(WORLD_SIZE/2));
             float p = noise2d(lx, lz);
-            p = floorf(p * MAX_HEIGHT);
-            if (p < 0)
-                p *= -1;
+            p = floorf(p * MAX_HEIGHT/4)+3;
             if(p > MAX_HEIGHT)
                 p = MAX_HEIGHT;
             for (size_t _y = 0; _y < CHUNK_DIMENSION && ((y*CHUNK_DIMENSION)+_y < p); _y++)
