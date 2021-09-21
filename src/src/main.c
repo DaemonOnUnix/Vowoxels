@@ -21,6 +21,7 @@
 #include "tests/testground.h"
 
 #include "voxelengine/data.h"
+#include "voxelengine/debug.h"
 EngineData* data;
 #include "linear_algebra/perlinnoise.h"
 
@@ -46,6 +47,7 @@ int main() {
 
     data->chunkM = initChunkManager();
 
+    initDebug();
 	drawLoop();
 
 

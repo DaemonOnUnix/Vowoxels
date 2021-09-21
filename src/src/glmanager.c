@@ -10,6 +10,8 @@
 #include "linear_algebra/mat4.h"
 
 #include "voxelengine/data.h"
+#include "voxelengine/collision.h"
+#include "voxelengine/debug.h"
 #include "tests/testground.h"
 
 bool viewMode = false;
@@ -159,9 +161,24 @@ void processInput(float deltaTime){
 		mouseEnabled = false;
 	}
 	if (glfwGetMouseButton(data->window, GLFW_MOUSE_BUTTON_LEFT)){
-		glfwSetInputMode(data->window, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
-		mouseEnabled = true;
-		glfwSetCursorPos(data->window , data->width/2.0f, data->height/2.0f);
+		if(mouseEnabled){
+			Ray r;
+			r.origin = vec3$(data->camera->cameraPos.x,data->camera->cameraPos.y,data->camera->cameraPos.z);
+			r.lenght = 1000.0f;
+			r.dir = vec3$(data->camera->cameraFront.x,data->camera->cameraFront.y,data->camera->cameraFront.z);
+			RaycastHit hit;
+			if(RayCast(r, &hit)){
+				LOG_INFO("HIT voxel x: %f, y: %f, z: %f", hit.point.x, hit.point.y, hit.point.z)
+			}else{
+				LOG_INFO("Ray didn't hit")
+			}
+		}else
+		{
+			glfwSetInputMode(data->window, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
+			mouseEnabled = true;
+			glfwSetCursorPos(data->window , data->width/2.0f, data->height/2.0f);
+		}
+		
 	}
 	if (glfwGetKey(data->window, GLFW_KEY_P) == GLFW_PRESS){
 		if (viewMode) {
@@ -197,6 +214,7 @@ void processInput(float deltaTime){
 void drawChunk(Chunk* chunk){
 	if(!chunk || chunk->is_air)
 		return;
+	glUseProgram(data->shaderProgram);
 	if(!chunk->VAO){
 		updateChunk(chunk);
 	}
@@ -250,7 +268,7 @@ void drawLoop(){
 			drawChunk(ch->chunk);
 		}
 		pthread_rwlock_unlock(&data->chunkM->chunkslock);
-		
+		drawDebug(deltaTime, view, projection);
 		updateChunks(data->camera->cameraPos);
 
 		glfwSwapBuffers(data->window);
