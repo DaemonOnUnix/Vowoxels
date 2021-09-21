@@ -137,13 +137,18 @@ void* thread_loading_chunks(void *args){
         }
         // Shearch next chunk to load
         pthread_rwlock_rdlock(&data->chunkM->chunkslock);
-        for (struct chunk_list* chnk = data->chunkM->chunks; !data->chunkM->need_update && chnk != NULL; chnk = chnk->next) {
+        for (struct chunk_list* chnk = data->chunkM->chunks; !data->chunkM->need_update && chnk != NULL;) {
             if(chnk->chunk->chunk_x == x && chnk->chunk->chunk_y == y && chnk->chunk->chunk_z == z) {
                 pthread_rwlock_unlock(&data->chunkM->chunkslock);
                 updateCoord(&dir, &x, &y, &z, camx, camy, camz);
                 chnk = data->chunkM->chunks;
                 pthread_rwlock_rdlock(&data->chunkM->chunkslock);
             }
+            else
+            {
+                chnk = chnk->next;
+            }
+            
         }
         pthread_rwlock_unlock(&data->chunkM->chunkslock);
 
