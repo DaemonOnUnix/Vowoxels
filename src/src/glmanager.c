@@ -169,8 +169,6 @@ void processInput(float deltaTime){
 			RaycastHit hit;
 			if(RayCast(r, &hit)){
 				LOG_INFO("HIT voxel x: %f, y: %f, z: %f", hit.point.x, hit.point.y, hit.point.z)
-			}else{
-				LOG_INFO("Ray didn't hit")
 			}
 		}else
 		{

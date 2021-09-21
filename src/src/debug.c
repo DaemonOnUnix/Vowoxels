@@ -3,26 +3,26 @@
 #include <GL/glew.h>
 static struct DebugStruct debug_buffers;
 
-void drawbox(Vec3 start, Vec3 size, Vec3 color, float time){
-    drawline(start, vec3_add(start, vec3$(size.x, 0.0f, 0.0f)), color, time);
-    drawline(start, vec3_add(start, vec3$(0.0f, size.y, 0.0f)), color, time);
-    drawline(start, vec3_add(start, vec3$(0.0f, 0.0f, size.z)), color, time);
+void debugDrawBox(Vec3 start, Vec3 size, Vec3 color, float time){
+    debugDrawLine(start, vec3_add(start, vec3$(size.x, 0.0f, 0.0f)), color, time);
+    debugDrawLine(start, vec3_add(start, vec3$(0.0f, size.y, 0.0f)), color, time);
+    debugDrawLine(start, vec3_add(start, vec3$(0.0f, 0.0f, size.z)), color, time);
 
-    drawline(vec3_add(start, size), vec3_add(start, vec3$(size.x, 0.0f, size.z)), color, time);
-    drawline(vec3_add(start, size), vec3_add(start, vec3$(0.0f, size.y, size.z)), color, time);
-    drawline(vec3_add(start, size), vec3_add(start, vec3$(size.x, size.y, 0.0f)), color, time);
+    debugDrawLine(vec3_add(start, size), vec3_add(start, vec3$(size.x, 0.0f, size.z)), color, time);
+    debugDrawLine(vec3_add(start, size), vec3_add(start, vec3$(0.0f, size.y, size.z)), color, time);
+    debugDrawLine(vec3_add(start, size), vec3_add(start, vec3$(size.x, size.y, 0.0f)), color, time);
 
-    drawline(vec3_add(start, vec3$(size.x, 0.0f, 0.0f)), vec3_add(start, vec3$(size.x, 0.0f, size.z)), color, time);
-    drawline(vec3_add(start, vec3$(0.0f, 0.0f, size.z)), vec3_add(start, vec3$(size.x, 0.0f, size.z)), color, time);
+    debugDrawLine(vec3_add(start, vec3$(size.x, 0.0f, 0.0f)), vec3_add(start, vec3$(size.x, 0.0f, size.z)), color, time);
+    debugDrawLine(vec3_add(start, vec3$(0.0f, 0.0f, size.z)), vec3_add(start, vec3$(size.x, 0.0f, size.z)), color, time);
 
-    drawline(vec3_add(start, vec3$(0.0f, size.y, 0.0f)), vec3_add(start, vec3$(size.x, size.y, 0.0f)), color, time);
-    drawline(vec3_add(start, vec3$(0.0f, size.y, 0.0f)), vec3_add(start, vec3$(0.0f, size.y, size.z)), color, time);
+    debugDrawLine(vec3_add(start, vec3$(0.0f, size.y, 0.0f)), vec3_add(start, vec3$(size.x, size.y, 0.0f)), color, time);
+    debugDrawLine(vec3_add(start, vec3$(0.0f, size.y, 0.0f)), vec3_add(start, vec3$(0.0f, size.y, size.z)), color, time);
 
-    drawline(vec3_add(start, vec3$(size.x, 0.0f, 0.0f)), vec3_add(start, vec3$(size.x, size.y, 0.0f)), color, time);
-    drawline(vec3_add(start, vec3$(0.0f, 0.0f, size.z)), vec3_add(start, vec3$(0.0f, size.y, size.z)), color, time);
+    debugDrawLine(vec3_add(start, vec3$(size.x, 0.0f, 0.0f)), vec3_add(start, vec3$(size.x, size.y, 0.0f)), color, time);
+    debugDrawLine(vec3_add(start, vec3$(0.0f, 0.0f, size.z)), vec3_add(start, vec3$(0.0f, size.y, size.z)), color, time);
 }
 
-void drawline(Vec3 start, Vec3 end, Vec3 color, float time){
+void debugDrawLine(Vec3 start, Vec3 end, Vec3 color, float time){
     addDebugVertex(start, color, time);
     addDebugVertex(end, color, time);
 }

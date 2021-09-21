@@ -3,8 +3,9 @@
 
 #include "linear_algebra/vec3.h"
 #include "linear_algebra/mat4.h"
+#include "voxelengine/collision.h"
 
-#define DEBUG_MAX_LINES 20000
+#define DEBUG_MAX_LINES 100000
 
 struct DebugVertex{
     float x;
@@ -26,8 +27,11 @@ struct DebugStruct{
 };
 
 void initDebug();
-void drawbox(Vec3 start, Vec3 size, Vec3 color, float time);
-void drawline(Vec3 start, Vec3 end, Vec3 color, float time);
+void debugDrawBox(Vec3 start, Vec3 size, Vec3 color, float time);
+void debugDrawLine(Vec3 start, Vec3 end, Vec3 color, float time);
+static inline void debugDrawRay(Ray ray, Vec3 color, float time){
+    debugDrawLine(ray.origin, vec3_add(ray.origin, vec3_mul_val(ray.dir, ray.lenght)), color, time);
+}
 void addDebugVertex(Vec3 vertex, Vec3 color, float time);
 unsigned int debugBindShader();
 void drawDebug(float delta_time, Mat4 view, Mat4 projection);

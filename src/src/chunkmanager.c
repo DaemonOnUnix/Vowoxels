@@ -70,14 +70,14 @@ void updateChunks(Vec3 camera_pos){
     EngineData* data = getEngineData();
     // Check if camera change chunk
     if(
-        ((int32_t)camera_pos.x)/CHUNK_DIMENSION != data->chunkM->actual_chunk_x ||
-        ((int32_t)camera_pos.y)/CHUNK_DIMENSION != data->chunkM->actual_chunk_y ||
-        ((int32_t)camera_pos.z)/CHUNK_DIMENSION != data->chunkM->actual_chunk_z ){
+        (int32_t)floorf(camera_pos.x/CHUNK_DIMENSION) != data->chunkM->actual_chunk_x ||
+        (int32_t)floorf(camera_pos.y/CHUNK_DIMENSION) != data->chunkM->actual_chunk_y ||
+        (int32_t)floorf(camera_pos.z/CHUNK_DIMENSION) != data->chunkM->actual_chunk_z ){
         // ICI
         LOG_INFO("Chunks need update")
-        data->chunkM->actual_chunk_x = ((int32_t)camera_pos.x)/CHUNK_DIMENSION;
-        data->chunkM->actual_chunk_y = ((int32_t)camera_pos.y)/CHUNK_DIMENSION;
-        data->chunkM->actual_chunk_z = ((int32_t)camera_pos.z)/CHUNK_DIMENSION;
+        data->chunkM->actual_chunk_x = (int32_t)floorf(camera_pos.x/CHUNK_DIMENSION);
+        data->chunkM->actual_chunk_y = (int32_t)floorf(camera_pos.y/CHUNK_DIMENSION);
+        data->chunkM->actual_chunk_z = (int32_t)floorf(camera_pos.z/CHUNK_DIMENSION);
         smartstr pogstr pikalul = string("", 40 );
         int64_t nbchunks = 0;
 
