@@ -23,10 +23,14 @@ void updateChunkVertex(Chunk* chunk){
     neighbour[3] = getChunk(chunk->chunk_x, chunk->chunk_y+1, chunk->chunk_z);
     neighbour[4] = getChunk(chunk->chunk_x, chunk->chunk_y, chunk->chunk_z-1);
     neighbour[5] = getChunk(chunk->chunk_x, chunk->chunk_y, chunk->chunk_z+1);
-    if (chunk->vertex_buffer)
+    if (chunk->vertex_buffer){
         free(chunk->vertex_buffer);
-    if (chunk->triangles_buffer)
+        chunk->vertex_buffer = NULL;
+    }
+    if (chunk->triangles_buffer){
         free(chunk->triangles_buffer);
+        chunk->triangles_buffer = NULL;
+    }
     
     for(size_t x = 0; x < CHUNK_DIMENSION; x++){
         for(size_t y = 0; y < CHUNK_DIMENSION; y++){

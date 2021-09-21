@@ -8,7 +8,7 @@ void updateCoord(int* dir, int32_t* x, int32_t* y, int32_t* z, int32_t camx, int
     EngineData* data = getEngineData();
     if(*y<0){
         LOG_INFO("UNDER THE MAP")
-        *dir = 5;
+        *dir = 7;
     }
     switch (*dir)
     {
@@ -19,13 +19,13 @@ void updateCoord(int* dir, int32_t* x, int32_t* y, int32_t* z, int32_t camx, int
         break;
     case 1:
         (*y)--;
-        if(*y<=0){
+        if(*y <= 0){
             (*y) = camy+VIEW_DIST;
             (*dir)++;
         }
         break;
     case 2:
-        if((*y) == 0){
+        if((*y) <= 0){
             (*y) = camy+VIEW_DIST;
             (*z)++;
             if (*z - camz == *x - camx)
@@ -35,7 +35,7 @@ void updateCoord(int* dir, int32_t* x, int32_t* y, int32_t* z, int32_t camx, int
         }
         break;
     case 3:
-        if((*y) == 0){
+        if((*y) <= 0){
             (*y) = camy+VIEW_DIST;
             (*x)--;
             if (*x - camx == -(*z - camz))
@@ -45,7 +45,7 @@ void updateCoord(int* dir, int32_t* x, int32_t* y, int32_t* z, int32_t camx, int
         }
         break;
     case 4:
-        if((*y) == 0){
+        if((*y) <= 0){
             (*y) = camy+VIEW_DIST;
             (*z)--;
             if (*x - camx == *z - camz)
@@ -55,7 +55,7 @@ void updateCoord(int* dir, int32_t* x, int32_t* y, int32_t* z, int32_t camx, int
         }
         break;
     case 5:
-        if((*y) == 0){
+        if((*y) <= 0){
             (*y) = camy+VIEW_DIST;
             (*x)++;
             if (*x - camx == -(*z - camz))
@@ -66,7 +66,7 @@ void updateCoord(int* dir, int32_t* x, int32_t* y, int32_t* z, int32_t camx, int
         break;
     case 6:
         (*y)--;
-        if((*y) == 0){
+        if((*y) <= 0){
             if(VIEW_DIST > *x - camx)
                 (*dir)=0;
             else

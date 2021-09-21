@@ -14,6 +14,7 @@
 #endif
 
 void updateChunk(Chunk* chunk){
+	glUseProgram(getEngineData()->shaderProgram);
     if(!chunk->VAO){
         glGenVertexArrays(1, &chunk->VAO);
         glGenBuffers(2, chunk->VBO);

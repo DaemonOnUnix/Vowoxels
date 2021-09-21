@@ -169,6 +169,7 @@ void processInput(float deltaTime){
 			RaycastHit hit;
 			if(RayCast(r, &hit)){
 				LOG_INFO("HIT voxel x: %f, y: %f, z: %f", hit.point.x, hit.point.y, hit.point.z)
+				place_voxel_to_hit(hit, 0);
 			}
 		}else
 		{

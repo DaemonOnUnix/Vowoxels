@@ -12,7 +12,9 @@ typedef enum {
 typedef struct
 {
     ObjectType type;
+    void *object;
     Vec3 point;
+    float lenght;
 } RaycastHit;
 
 typedef struct

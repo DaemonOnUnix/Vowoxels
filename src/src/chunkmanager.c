@@ -141,6 +141,7 @@ void* thread_loading_chunks(void *args){
             if(chnk->chunk->chunk_x == x && chnk->chunk->chunk_y == y && chnk->chunk->chunk_z == z) {
                 pthread_rwlock_unlock(&data->chunkM->chunkslock);
                 updateCoord(&dir, &x, &y, &z, camx, camy, camz);
+                chnk = data->chunkM->chunks;
                 pthread_rwlock_rdlock(&data->chunkM->chunkslock);
             }
         }
@@ -170,3 +171,75 @@ void* thread_loading_chunks(void *args){
     pthread_exit(NULL);
 }
 
+
+void place_voxel_to_hit(RaycastHit hit, uint32_t voxel_id){
+    Chunk *chunk = (Chunk *)hit.object;
+
+    if (!chunk)
+    {
+        LOG_ERR("Can't place voxel x: %f y: %f z: %f", hit.point.x, hit.point.y, hit.point.z);
+        return;
+    }
+    
+    Vec3 coord = vec3_sub(hit.point, vec3_mul_val(vec3$(chunk->chunk_x, chunk->chunk_y, chunk->chunk_z), CHUNK_DIMENSION));
+    chunk->voxel_list[ INDEX_TO_CHUNK((int32_t)coord.x, (int32_t)coord.y, (int32_t)coord.z)] = voxel_id;
+    updateChunkVertex(chunk);
+    updateChunk(chunk);
+    Chunk *chunknext;
+    if(coord.x == 0){
+        chunknext = getChunk(chunk->chunk_x-1, chunk->chunk_y, chunk->chunk_z);
+        if (chunknext){
+            updateChunkVertex(chunknext);
+            updateChunk(chunknext);
+        }
+    }
+    if(coord.x == CHUNK_DIMENSION-1){
+        chunknext = getChunk(chunk->chunk_x+1, chunk->chunk_y, chunk->chunk_z);
+        if (chunknext){
+            updateChunkVertex(chunknext);
+            updateChunk(chunknext);
+        }
+    }
+    if(coord.y == 0){
+        chunknext = getChunk(chunk->chunk_x, chunk->chunk_y-1, chunk->chunk_z);
+        if (chunknext){
+            updateChunkVertex(chunknext);
+            updateChunk(chunknext);
+        }
+    }
+    if(coord.y == CHUNK_DIMENSION-1){
+        chunk = getChunk(chunk->chunk_x, chunk->chunk_y+1, chunk->chunk_z);
+        if (chunknext){
+            updateChunkVertex(chunknext);
+            updateChunk(chunknext);
+        }
+    }
+    if(coord.z == 0){
+        chunknext = getChunk(chunk->chunk_x, chunk->chunk_y, chunk->chunk_z-1);
+        if (chunknext){
+            updateChunkVertex(chunknext);
+            updateChunk(chunknext);
+        }
+    }
+    if(coord.z == CHUNK_DIMENSION-1){
+        chunknext = getChunk(chunk->chunk_x, chunk->chunk_y, chunk->chunk_z+1);
+        if (chunknext){
+            updateChunkVertex(chunknext);
+            updateChunk(chunknext);
+        }
+    }
+}
+void place_voxel(int32_t voxel_x, int32_t voxel_y, int32_t voxel_z, uint32_t voxel_id){
+    Chunk *chunk = getChunk(voxel_x/CHUNK_DIMENSION, voxel_y/CHUNK_DIMENSION, voxel_z/CHUNK_DIMENSION);
+
+    if (!chunk)
+    {
+        LOG_ERR("Can't place voxel x: %i y: %i z: %i", voxel_x, voxel_y, voxel_z);
+        return;
+    }
+    
+
+    chunk->voxel_list[ INDEX_TO_CHUNK(voxel_x % CHUNK_DIMENSION, voxel_y % CHUNK_DIMENSION, voxel_z % CHUNK_DIMENSION)] = voxel_id;
+    updateChunkVertex(chunk);
+    updateChunk(chunk);
+}

@@ -6,8 +6,9 @@
 #include "pthread/helper.h"
 #include <pthread.h>
 #include <stdatomic.h>
+#include "voxelengine/collision.h"
 
-#define VIEW_DIST 2
+#define VIEW_DIST 1
 
 typedef struct {
     int64_t actual_chunk_x;
@@ -36,5 +37,6 @@ Chunk* deleteNextChunklist(struct chunk_list* ch_list_prev);
 Chunk* getChunk(int32_t x, int32_t y, int32_t z);
 
 void updateCoord(int* dir, int32_t* x, int32_t* y, int32_t* z, int32_t camx, int32_t camy, int32_t camz);
-
+void place_voxel(int32_t voxel_x, int32_t voxel_y, int32_t voxel_z, uint32_t voxel_id);
+void place_voxel_to_hit(RaycastHit hit, uint32_t voxel_id);
 #endif

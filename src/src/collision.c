@@ -61,7 +61,7 @@ bool RayCast(Ray ray, RaycastHit* hit){
     if(ray.dir.z < 0){
         zdir = -1;
     }
-    debugDrawRay(ray, vec3$(1,1,1), 10);
+    //debugDrawRay(ray, vec3$(1,1,1), 10);
     
     // Check Chunks
     for (int32_t chunkx = startChunkX; (chunkx > startChunkX - endChunkX) && (chunkx < startChunkX + endChunkX); chunkx+=xdir){
@@ -70,7 +70,7 @@ bool RayCast(Ray ray, RaycastHit* hit){
             
                 Chunk* chunk = getChunk(chunkx, chunky, chunkz);
                 Vec3 chunkcoord = vec3_mul_val(vec3$(chunkx, chunky, chunkz), CHUNK_DIMENSION);
-                debugDrawBox(chunkcoord, vec3$(CHUNK_DIMENSION, CHUNK_DIMENSION, CHUNK_DIMENSION), vec3$(1,0,0), 10);
+                //debugDrawBox(chunkcoord, vec3$(CHUNK_DIMENSION, CHUNK_DIMENSION, CHUNK_DIMENSION), vec3$(1,0,0), 10);
                 if(!chunk || chunk->is_air)
                     continue;
 
@@ -85,9 +85,11 @@ bool RayCast(Ray ray, RaycastHit* hit){
                             if(chunk->voxel_list[ INDEX_TO_CHUNK(voxelx, voxely, voxelz) ]){
                                 float inter_lenght = 0;
                                 if(isRayCollideAABB(ray, &inter_lenght, chunkcoord.x+voxelx, chunkcoord.x+voxelx+1.0f, chunkcoord.y+voxely, chunkcoord.y+voxely+1.0f, chunkcoord.z+voxelz, chunkcoord.z+voxelz+1.0f)){
-                                    debugDrawBox(vec3_add(chunkcoord, vec3$(voxelx, voxely, voxelz)), vec3$(1, 1, 1), vec3$(0,0,1), 10);
+                                    //debugDrawBox(vec3_add(chunkcoord, vec3$(voxelx, voxely, voxelz)), vec3$(1, 1, 1), vec3$(0,0,1), 10);
                                     hit->point = vec3_add(chunkcoord, vec3$(voxelx, voxely, voxelz));
                                     hit->type = CHUNK;
+                                    hit->lenght = inter_lenght;
+                                    hit->object = chunk;
                                     return true;
                                 }
                             }
@@ -97,10 +99,5 @@ bool RayCast(Ray ray, RaycastHit* hit){
             }
         }
     }
-    
-    
-
-
-
     return false;
 }
