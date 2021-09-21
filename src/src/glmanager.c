@@ -164,7 +164,7 @@ void processInput(float deltaTime){
 		if(mouseEnabled){
 			Ray r;
 			r.origin = vec3$(data->camera->cameraPos.x,data->camera->cameraPos.y,data->camera->cameraPos.z);
-			r.lenght = 1000.0f;
+			r.lenght = 10.0f;
 			r.dir = vec3$(data->camera->cameraFront.x,data->camera->cameraFront.y,data->camera->cameraFront.z);
 			RaycastHit hit;
 			if(RayCast(r, &hit)){

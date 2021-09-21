@@ -2,6 +2,7 @@
 #include "voxelengine/chunkmanager.h"
 #include "voxelengine/collision.h"
 #include "voxelengine/debug.h"
+#include "linear_algebra/utils.h"
 
 bool isRayCollideAABB(Ray r, float* inter_lenght, float minX, float maxX, float minY, float maxY, float minZ, float maxZ){
     Vec3 dirfrac;
@@ -40,15 +41,12 @@ bool isRayCollideAABB(Ray r, float* inter_lenght, float minX, float maxX, float 
 }
 
 bool RayCast(Ray ray, RaycastHit* hit){
-    int32_t startX = (int32_t)floorf(ray.origin.x);
-    int32_t startY = (int32_t)floorf(ray.origin.y);
-    int32_t startZ = (int32_t)floorf(ray.origin.z);
     int32_t startChunkX = (int32_t)floorf((float)ray.origin.x / (float)CHUNK_DIMENSION);
     int32_t startChunkY = (int32_t)floorf((float)ray.origin.y / (float)CHUNK_DIMENSION);
     int32_t startChunkZ = (int32_t)floorf((float)ray.origin.z / (float)CHUNK_DIMENSION);
-    int32_t endChunkX = (int32_t)floorf((float)(ray.origin.x + (ray.lenght * ray.dir.x)) / (float)CHUNK_DIMENSION);
-    int32_t endChunkY = (int32_t)floorf((float)(ray.origin.y + (ray.lenght * ray.dir.y)) / (float)CHUNK_DIMENSION);
-    int32_t endChunkZ = (int32_t)floorf((float)(ray.origin.z + (ray.lenght * ray.dir.z)) / (float)CHUNK_DIMENSION);
+    int32_t endChunkX = (int32_t)ceilf((float)(ray.origin.x + (ray.lenght * la_abs(ray.dir.x))) / (float)CHUNK_DIMENSION)-startChunkX;
+    int32_t endChunkY = (int32_t)ceilf((float)(ray.origin.y + (ray.lenght * la_abs(ray.dir.y))) / (float)CHUNK_DIMENSION)-startChunkY;
+    int32_t endChunkZ = (int32_t)ceilf((float)(ray.origin.z + (ray.lenght * la_abs(ray.dir.z))) / (float)CHUNK_DIMENSION)-startChunkZ;
 
     // Dir to check
     char xdir = 1;
@@ -66,15 +64,15 @@ bool RayCast(Ray ray, RaycastHit* hit){
     debugDrawRay(ray, vec3$(1,1,1), 10);
     
     // Check Chunks
-    for (int32_t chunkx = startChunkX; chunkx > endChunkX * (-xdir) && chunkx < endChunkX * xdir; chunkx+=xdir){
-        for (int32_t chunky = startChunkY; chunky > endChunkY * (-ydir) &&  chunky < endChunkY * ydir; chunky+=ydir){
-            for (int32_t chunkz = startChunkZ; chunkz > endChunkZ * (-zdir) &&  chunkz < endChunkZ * zdir; chunkz+=zdir){
+    for (int32_t chunkx = startChunkX; (chunkx > startChunkX - endChunkX) && (chunkx < startChunkX + endChunkX); chunkx+=xdir){
+        for (int32_t chunkz = startChunkZ; (chunkz > startChunkZ - endChunkZ) &&  (chunkz < startChunkZ + endChunkZ); chunkz+=zdir){
+            for (int32_t chunky = startChunkY; chunky >= 0 && (chunky > startChunkY - endChunkY) &&  (chunky < startChunkY + endChunkY); chunky+=ydir){
             
                 Chunk* chunk = getChunk(chunkx, chunky, chunkz);
-                if(!chunk || chunk->is_air)
-                    continue;
                 Vec3 chunkcoord = vec3_mul_val(vec3$(chunkx, chunky, chunkz), CHUNK_DIMENSION);
                 debugDrawBox(chunkcoord, vec3$(CHUNK_DIMENSION, CHUNK_DIMENSION, CHUNK_DIMENSION), vec3$(1,0,0), 10);
+                if(!chunk || chunk->is_air)
+                    continue;
 
                 // Check voxels
                 // TODO: Optimize start value
@@ -88,7 +86,7 @@ bool RayCast(Ray ray, RaycastHit* hit){
                                 float inter_lenght = 0;
                                 if(isRayCollideAABB(ray, &inter_lenght, chunkcoord.x+voxelx, chunkcoord.x+voxelx+1.0f, chunkcoord.y+voxely, chunkcoord.y+voxely+1.0f, chunkcoord.z+voxelz, chunkcoord.z+voxelz+1.0f)){
                                     debugDrawBox(vec3_add(chunkcoord, vec3$(voxelx, voxely, voxelz)), vec3$(1, 1, 1), vec3$(0,0,1), 10);
-                                    hit->point = vec3$(voxelx, voxely, voxelz);
+                                    hit->point = vec3_add(chunkcoord, vec3$(voxelx, voxely, voxelz));
                                     hit->type = CHUNK;
                                     return true;
                                 }
