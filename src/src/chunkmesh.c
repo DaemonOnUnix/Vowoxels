@@ -12,6 +12,8 @@
     vertex_count++;
 
 void updateChunkVertex(Chunk* chunk){
+    if(!chunk)
+        return;
     EngineData* data = getEngineData();
     struct Atlas* atlas = data->atlas->next;
     size_t vertex_count = 0;

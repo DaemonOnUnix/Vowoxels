@@ -135,6 +135,13 @@ void drawChunk(Chunk* chunk){
 	if(!chunk || chunk->is_air)
 		return;
 	glUseProgram(data->shaderProgram);
+	if (chunk->need_vertex_update)
+	{
+		updateChunkVertex(chunk);
+		updateChunk(chunk);
+		chunk->need_vertex_update = false;
+	}
+	
 	if(!chunk->VAO){
 		updateChunk(chunk);
 	}

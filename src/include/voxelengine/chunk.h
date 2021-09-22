@@ -41,6 +41,7 @@ typedef struct {
     int32_t chunk_z;
 
     bool is_air;
+    bool need_vertex_update;
 	unsigned int VAO;
 	unsigned int VBO[2];
 

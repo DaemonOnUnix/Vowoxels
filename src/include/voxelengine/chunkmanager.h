@@ -39,4 +39,14 @@ Chunk* getChunk(int32_t x, int32_t y, int32_t z);
 void updateCoord(int* dir, int32_t* x, int32_t* y, int32_t* z, int32_t camx, int32_t camy, int32_t camz);
 void place_voxel(int32_t voxel_x, int32_t voxel_y, int32_t voxel_z, uint32_t voxel_id);
 void place_voxel_to_hit(RaycastHit hit, uint32_t voxel_id);
+
+static inline void updateChunkMesh(Chunk* chunk_to_update){
+    if (chunk_to_update){
+        updateChunkVertex(chunk_to_update);
+        updateChunk(chunk_to_update);
+    }
+}
+static inline void updateChunkMeshByCoord(int32_t voxel_x, int32_t voxel_y, int32_t voxel_z){
+    updateChunkMesh(getChunk(voxel_x, voxel_y, voxel_z));
+}
 #endif

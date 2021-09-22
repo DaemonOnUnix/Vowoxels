@@ -166,7 +166,23 @@ void* thread_loading_chunks(void *args){
 
         // Create mesh
         updateChunkVertex(chunk);
-
+        if(!chunk->is_air){
+            Chunk * tmp = getChunk(chunk->chunk_x+1, chunk->chunk_y, chunk->chunk_z);
+            if(tmp)
+                tmp->need_vertex_update = true;
+            tmp = getChunk(chunk->chunk_x-1, chunk->chunk_y, chunk->chunk_z);
+            if(tmp)
+                tmp->need_vertex_update = true;
+            tmp = getChunk(chunk->chunk_x, chunk->chunk_y-1, chunk->chunk_z);
+            if(tmp)
+                tmp->need_vertex_update = true;
+            tmp = getChunk(chunk->chunk_x, chunk->chunk_y, chunk->chunk_z+1);
+            if(tmp)
+                tmp->need_vertex_update = true;
+            tmp = getChunk(chunk->chunk_x, chunk->chunk_y, chunk->chunk_z-1);
+            if(tmp)
+                tmp->need_vertex_update = true;
+        }
         // Add chunk to render
         insertChunkToChunklist(chunk);
 
@@ -188,50 +204,24 @@ void place_voxel_to_hit(RaycastHit hit, uint32_t voxel_id){
     
     Vec3 coord = vec3_sub(hit.point, vec3_mul_val(vec3$(chunk->chunk_x, chunk->chunk_y, chunk->chunk_z), CHUNK_DIMENSION));
     chunk->voxel_list[ INDEX_TO_CHUNK((int32_t)coord.x, (int32_t)coord.y, (int32_t)coord.z)] = voxel_id;
-    updateChunkVertex(chunk);
-    updateChunk(chunk);
-    Chunk *chunknext;
+    updateChunkMesh(chunk);
     if(coord.x == 0){
-        chunknext = getChunk(chunk->chunk_x-1, chunk->chunk_y, chunk->chunk_z);
-        if (chunknext){
-            updateChunkVertex(chunknext);
-            updateChunk(chunknext);
-        }
+        updateChunkMeshByCoord(chunk->chunk_x-1, chunk->chunk_y, chunk->chunk_z);
     }
     if(coord.x == CHUNK_DIMENSION-1){
-        chunknext = getChunk(chunk->chunk_x+1, chunk->chunk_y, chunk->chunk_z);
-        if (chunknext){
-            updateChunkVertex(chunknext);
-            updateChunk(chunknext);
-        }
+        updateChunkMeshByCoord(chunk->chunk_x+1, chunk->chunk_y, chunk->chunk_z);
     }
     if(coord.y == 0){
-        chunknext = getChunk(chunk->chunk_x, chunk->chunk_y-1, chunk->chunk_z);
-        if (chunknext){
-            updateChunkVertex(chunknext);
-            updateChunk(chunknext);
-        }
+        updateChunkMeshByCoord(chunk->chunk_x, chunk->chunk_y-1, chunk->chunk_z);
     }
     if(coord.y == CHUNK_DIMENSION-1){
-        chunk = getChunk(chunk->chunk_x, chunk->chunk_y+1, chunk->chunk_z);
-        if (chunknext){
-            updateChunkVertex(chunknext);
-            updateChunk(chunknext);
-        }
+        updateChunkMeshByCoord(chunk->chunk_x, chunk->chunk_y+1, chunk->chunk_z);
     }
     if(coord.z == 0){
-        chunknext = getChunk(chunk->chunk_x, chunk->chunk_y, chunk->chunk_z-1);
-        if (chunknext){
-            updateChunkVertex(chunknext);
-            updateChunk(chunknext);
-        }
+        updateChunkMeshByCoord(chunk->chunk_x, chunk->chunk_y, chunk->chunk_z-1);
     }
     if(coord.z == CHUNK_DIMENSION-1){
-        chunknext = getChunk(chunk->chunk_x, chunk->chunk_y, chunk->chunk_z+1);
-        if (chunknext){
-            updateChunkVertex(chunknext);
-            updateChunk(chunknext);
-        }
+        updateChunkMeshByCoord(chunk->chunk_x, chunk->chunk_y, chunk->chunk_z+1);
     }
 }
 void place_voxel(int32_t voxel_x, int32_t voxel_y, int32_t voxel_z, uint32_t voxel_id){

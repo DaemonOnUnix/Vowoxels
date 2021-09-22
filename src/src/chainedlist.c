@@ -57,6 +57,10 @@ Chunk* getChunk(int32_t x, int32_t y, int32_t z){
     EngineData* data = getEngineData();
     Chunk* chunk_to_return = NULL;
 
+    if(y < 0){
+        return NULL;
+    }
+
 
     pthread_rwlock_rdlock(&data->chunkM->chunkslock);
     for (struct chunk_list* chnk = data->chunkM->chunks; chnk != NULL && chunk_to_return == NULL; chnk = chnk->next) {
