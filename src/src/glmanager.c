@@ -14,15 +14,6 @@
 #include "voxelengine/debug.h"
 #include "tests/testground.h"
 
-bool viewMode = false;
-bool firstMouse = true;
-bool mouseEnabled = true;
-float lastX = 400;
-float lastY = 300;
-float yaw;
-float pitch;
-float mouseSpeed = 20.0f;
-
 GLFWwindow* glinit(){
 	EngineData* data = getEngineData();
     qASSERT(glfwInit());
@@ -140,76 +131,6 @@ Camera* initCamera(Vec3 cameraPos, Vec3 cameraFront, Vec3 cameraUp){
 	return cam;
 }
 
-void processInput(float deltaTime){
-	EngineData* data = getEngineData();
-	// Camera
-	float cameraSpeed = data->camera->cameraSpeed * deltaTime;
-	if (glfwGetKey(data->window, GLFW_KEY_W) == GLFW_PRESS)
-		data->camera->cameraPos = vec3_add(data->camera->cameraPos, vec3_mul_val(data->camera->cameraFront, cameraSpeed));
-	if (glfwGetKey(data->window, GLFW_KEY_S) == GLFW_PRESS)
-		data->camera->cameraPos = vec3_sub(data->camera->cameraPos, vec3_mul_val(data->camera->cameraFront, cameraSpeed));
-	if (glfwGetKey(data->window, GLFW_KEY_A) == GLFW_PRESS)
-		data->camera->cameraPos = vec3_sub(data->camera->cameraPos, vec3_mul_val(vec3_unit(vec3_cross(data->camera->cameraFront, data->camera->cameraUp)), cameraSpeed));
-	if (glfwGetKey(data->window, GLFW_KEY_D) == GLFW_PRESS)
-		data->camera->cameraPos = vec3_add(data->camera->cameraPos, vec3_mul_val(vec3_unit(vec3_cross(data->camera->cameraFront, data->camera->cameraUp)), cameraSpeed));
-	if (glfwGetKey(data->window, GLFW_KEY_SPACE) == GLFW_PRESS)
-		data->camera->cameraPos = vec3_add(data->camera->cameraPos, vec3_mul_val(data->camera->cameraUp, cameraSpeed));
-	if (glfwGetKey(data->window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS)
-		data->camera->cameraPos = vec3_sub(data->camera->cameraPos, vec3_mul_val(data->camera->cameraUp, cameraSpeed));
-	if (glfwGetKey(data->window, GLFW_KEY_ESCAPE)){
-		glfwSetInputMode(data->window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
-		mouseEnabled = false;
-	}
-	if (glfwGetMouseButton(data->window, GLFW_MOUSE_BUTTON_LEFT)){
-		if(mouseEnabled){
-			Ray r;
-			r.origin = vec3$(data->camera->cameraPos.x,data->camera->cameraPos.y,data->camera->cameraPos.z);
-			r.lenght = 10.0f;
-			r.dir = vec3$(data->camera->cameraFront.x,data->camera->cameraFront.y,data->camera->cameraFront.z);
-			RaycastHit hit;
-			if(RayCast(r, &hit)){
-				LOG_INFO("HIT voxel x: %f, y: %f, z: %f", hit.point.x, hit.point.y, hit.point.z)
-				place_voxel_to_hit(hit, 0);
-			}
-		}else
-		{
-			glfwSetInputMode(data->window, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
-			mouseEnabled = true;
-			glfwSetCursorPos(data->window , data->width/2.0f, data->height/2.0f);
-		}
-		
-	}
-	if (glfwGetKey(data->window, GLFW_KEY_P) == GLFW_PRESS){
-		if (viewMode) {
-			glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-			viewMode = !viewMode;
-		}
-		else{
-			glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-			viewMode = !viewMode;
-		}
-	}
-	// Cursor Pos
-	if(mouseEnabled){
-		double xpos, ypos;
-		glfwGetCursorPos(data->window, &xpos, &ypos);
-
-		yaw   += mouseSpeed * deltaTime * (float)( data->width/2 - xpos );
-		pitch += mouseSpeed * deltaTime * (float)( data->height/2 - ypos );
-
-		if(pitch > 89.0f)
-			pitch =  89.0f;
-		if(pitch < -89.0f)
-			pitch = -89.0f;
-
-		Vec3 front = vec3$(cos(to_radians(pitch)) * sin(to_radians(yaw)), sin(to_radians(pitch)), cos(to_radians(pitch)) * cos(to_radians(yaw)));
-		data->camera->cameraFront = vec3_unit(front);
-
-		// Set cursor middle of the screen	
-		glfwSetCursorPos(data->window, data->width/2.0f, data->height/2.0f);
-	}
-}
-
 void drawChunk(Chunk* chunk){
 	if(!chunk || chunk->is_air)
 		return;
@@ -223,59 +144,6 @@ void drawChunk(Chunk* chunk){
 	glActiveTexture(GL_TEXTURE0);
 
 	glDrawElements(GL_TRIANGLES, chunk->triangles_count, GL_UNSIGNED_INT, (void*)0);
-}
-
-void drawLoop(){
-	EngineData* data = getEngineData();
-
-	float deltaTime = 0.0f; // Time between current frame and last frame
-	float lastFrame = 0.0f; // Time of last frame
-
-	int viewLoc = glGetUniformLocation(data->shaderProgram, "view");
-	int projectionLoc = glGetUniformLocation(data->shaderProgram, "projection");
-	int lightPos = glGetUniformLocation(data->shaderProgram, "skyLightDir");
-	Vec3 skycolor = vec3$(0.0353f, 0.6941f, 0.9254f);
-	while (!glfwWindowShouldClose(data->window)){
-		double timegl = glfwGetTime()/30;
-		Vec3 light = vec3$(sin(timegl), cos(timegl), -0.3f);
-		Vec3 sky = vec3_add(vec3_mul_val(vec3$(0.0353f, 0.6941f, 0.9254f),1.0f-((cos(timegl)+1)/2.0f)),vec3_mul_val(vec3$(0.0f, 0.0f, 0.0f),(cos(timegl)+1)/2.0f));
-        glClearColor(sky.x, sky.y, sky.z , 1.0f);
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-
-		glUseProgram(data->shaderProgram);
-
-		float currentFrame = glfwGetTime();
-		deltaTime = currentFrame - lastFrame;
-		lastFrame = currentFrame;
-
-		//ProcessInput
-  		processInput(deltaTime);
-		
-
-		// Le cube
-        Mat4 view = mat4_lookAt(data->camera->cameraPos, vec3_sub(data->camera->cameraPos, data->camera->cameraFront), data->camera->cameraUp);
-		Mat4 projection;
-		projection = mat4_perspective(to_radians(45.0f), (float)data->width / (float)data->height, 0.1f, 10000.0f);
-		glUniformMatrix4fv(viewLoc, 1, GL_FALSE, view.data);
-		glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, projection.data);
-		glUniform3f(lightPos, light.x, light.y, light.z);
-
-		tests(data->window);
-		pthread_rwlock_rdlock(&data->chunkM->chunkslock);
-		for (struct chunk_list* ch = data->chunkM->chunks; ch; ch = ch->next)
-		{
-			if(ch->chunk->is_air)
-				continue;
-			drawChunk(ch->chunk);
-		}
-		pthread_rwlock_unlock(&data->chunkM->chunkslock);
-		drawDebug(deltaTime, view, projection);
-		updateChunks(data->camera->cameraPos);
-
-		glfwSwapBuffers(data->window);
-		glfwPollEvents();
-	}
 }
 
 void window_size_callback(GLFWwindow* window, int width, int height)

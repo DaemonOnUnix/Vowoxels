@@ -7,8 +7,7 @@
 GLFWwindow* glinit();
 void glend();
 unsigned int bindShader();
-void processInput(float deltaTime);
-void drawLoop();
+void drawChunk(Chunk *chunk);
 void window_size_callback(GLFWwindow* window, int width, int height);
 
 #endif
