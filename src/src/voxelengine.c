@@ -18,7 +18,7 @@ void updateChunk(Chunk* chunk){
     if(!chunk->VAO){
         glGenVertexArrays(1, &chunk->VAO);
         glGenBuffers(2, chunk->VBO);
-    }
+    }    
 
     // Vertex buffer
     glBindVertexArray(chunk->VAO);
@@ -39,6 +39,13 @@ void updateChunk(Chunk* chunk){
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned int) * chunk->triangles_count, chunk->triangles_buffer, GL_DYNAMIC_DRAW);
 
     glBindVertexArray(chunk->VAO);
+
+    if(chunk->triangles_buffer)
+        free(chunk->triangles_buffer);
+    if(chunk->vertex_buffer)
+        free(chunk->vertex_buffer);
+    chunk->vertex_buffer = NULL;
+    chunk->triangles_buffer = NULL;
 }
 
 void autoGenTileInfo(unsigned int atlasIndex){

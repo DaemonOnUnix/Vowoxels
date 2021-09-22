@@ -234,9 +234,12 @@ void drawLoop(){
 	int viewLoc = glGetUniformLocation(data->shaderProgram, "view");
 	int projectionLoc = glGetUniformLocation(data->shaderProgram, "projection");
 	int lightPos = glGetUniformLocation(data->shaderProgram, "skyLightDir");
+	Vec3 skycolor = vec3$(0.0353f, 0.6941f, 0.9254f);
 	while (!glfwWindowShouldClose(data->window)){
-		Vec3 light = vec3$(-0.2f, -1.0f, -0.3f);
-        glClearColor(0.0353f, 0.6941f, 0.9254f, 1.0f);
+		double timegl = glfwGetTime()/30;
+		Vec3 light = vec3$(sin(timegl), cos(timegl), -0.3f);
+		Vec3 sky = vec3_add(vec3_mul_val(vec3$(0.0353f, 0.6941f, 0.9254f),1.0f-((cos(timegl)+1)/2.0f)),vec3_mul_val(vec3$(0.0f, 0.0f, 0.0f),(cos(timegl)+1)/2.0f));
+        glClearColor(sky.x, sky.y, sky.z , 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 

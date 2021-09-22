@@ -63,7 +63,7 @@ unsigned char saveChunkToFile(Chunk* chunk, char* dir){
     // Write Chunk
     for(int32_t voxel_count = 0; voxel_count < CHUNK_NUM_VOXEL;){
         // Search how many same voxel in raw
-        int32_t voxel_type = chunk->voxel_list[voxel_count];
+        int32_t voxel_type = (int32_t)chunk->voxel_list[voxel_count];
         int32_t voxel_mask = chunk->voxel_mask[voxel_count];
         int32_t voxel_num = 1;
         voxel_count++;
@@ -122,7 +122,7 @@ Chunk* loadChunkFromFile(char* dir, int32_t chunk_x, int32_t chunk_y, int32_t ch
         count += num;
 
         for(int32_t index = 0; index < num; index++, voxel_count++) {
-            to_return->voxel_list[voxel_count] = voxel_type;
+            to_return->voxel_list[voxel_count] = (VOXEL_ID_TYPE)voxel_type;
             to_return->voxel_mask[voxel_count] = (enum voxel_mask)voxel_mask;
         }
 

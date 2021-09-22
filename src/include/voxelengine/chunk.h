@@ -5,8 +5,9 @@
 #include "linear_algebra/vec3.h"
 #include "linear_algebra/mat4.h"
 #define CHUNK_DIMENSION 32
-#define MAX_HEIGHT 60
+#define MAX_HEIGHT 200
 #define CHUNK_NUM_VOXEL (CHUNK_DIMENSION * CHUNK_DIMENSION * CHUNK_DIMENSION)
+#define VOXEL_ID_TYPE uint8_t
 
 enum voxel_mask {
     Zm = 1,
@@ -43,8 +44,8 @@ typedef struct {
 	unsigned int VAO;
 	unsigned int VBO[2];
 
-    int32_t voxel_list[CHUNK_NUM_VOXEL];
-    enum voxel_mask voxel_mask[CHUNK_NUM_VOXEL];
+    VOXEL_ID_TYPE voxel_list[CHUNK_NUM_VOXEL];
+    uint8_t voxel_mask[CHUNK_NUM_VOXEL];
 
     struct Vertex *vertex_buffer;
     int64_t vertex_count;
