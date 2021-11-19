@@ -1,4 +1,4 @@
-BIN = minekraft.elf
+BIN = vowoxels.a
 
 LIB_FOLDER = lib
 
@@ -23,7 +23,7 @@ OBJ    := $(CFILES:%.c=$(BUILD)/%.o)
 
 $(shell mkdir -p $(addprefix $(BUILD)/,$(SRCDIRS)))
 
-all: NODEBUG
+all: $(BIN)
 
 .PHONY: all clean NODEBUG clean_deps
 
@@ -31,7 +31,8 @@ NODEBUG: $(BIN)
 	@./$<
 
 $(BIN): $(OBJ)
-	@$(CC) $(OBJ) $(LDFLAGS) -o $@
+	@ar crs $@ $(OBJ)
+	@echo "Library ${BIN} created!"
 
 $(BUILD)/%.o: %.c
 	@$(CC) -o $@ $(CFLAGS) $(INTERNALCFLAGS) -c $<
