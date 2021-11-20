@@ -193,34 +193,32 @@ void* thread_loading_chunks(void *args){
 }
 
 
-void place_voxel_to_hit(RaycastHit hit, uint32_t voxel_id){
-    Chunk *chunk = (Chunk *)hit.object;
-
+void place_voxel_to_coord(Chunk *chunk, Vec3 local_coord, uint32_t voxel_id)
+{
     if (!chunk)
     {
-        LOG_ERR("Can't place voxel x: %f y: %f z: %f", hit.point.x, hit.point.y, hit.point.z);
+        LOG_ERR("Can't place voxel x: %f y: %f z: %f", local_coord.x, local_coord.y, local_coord.z);
         return;
     }
-    
-    Vec3 coord = vec3_sub(hit.point, vec3_mul_val(vec3$(chunk->chunk_x, chunk->chunk_y, chunk->chunk_z), CHUNK_DIMENSION));
-    chunk->voxel_list[ INDEX_TO_CHUNK((int32_t)coord.x, (int32_t)coord.y, (int32_t)coord.z)] = voxel_id;
+
+    chunk->voxel_list[ INDEX_TO_CHUNK((int32_t)local_coord.x, (int32_t)local_coord.y, (int32_t)local_coord.z)] = voxel_id;
     updateChunkMesh(chunk);
-    if(coord.x == 0){
+    if(local_coord.x <= 0){
         updateChunkMeshByCoord(chunk->chunk_x-1, chunk->chunk_y, chunk->chunk_z);
     }
-    if(coord.x == CHUNK_DIMENSION-1){
+    if(local_coord.x >= CHUNK_DIMENSION-1){
         updateChunkMeshByCoord(chunk->chunk_x+1, chunk->chunk_y, chunk->chunk_z);
     }
-    if(coord.y == 0){
+    if(local_coord.y <= 0){
         updateChunkMeshByCoord(chunk->chunk_x, chunk->chunk_y-1, chunk->chunk_z);
     }
-    if(coord.y == CHUNK_DIMENSION-1){
+    if(local_coord.y >= CHUNK_DIMENSION-1){
         updateChunkMeshByCoord(chunk->chunk_x, chunk->chunk_y+1, chunk->chunk_z);
     }
-    if(coord.z == 0){
+    if(local_coord.z <= 0){
         updateChunkMeshByCoord(chunk->chunk_x, chunk->chunk_y, chunk->chunk_z-1);
     }
-    if(coord.z == CHUNK_DIMENSION-1){
+    if(local_coord.z >= CHUNK_DIMENSION-1){
         updateChunkMeshByCoord(chunk->chunk_x, chunk->chunk_y, chunk->chunk_z+1);
     }
 }

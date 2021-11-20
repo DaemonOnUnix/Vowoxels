@@ -30,7 +30,7 @@ Chunk* newChunk(int32_t chunk_x, int32_t chunk_y, int32_t chunk_z){
     chunk->is_air = false;
     chunk->triangles_buffer = NULL;
     chunk->vertex_buffer = NULL;
-    LOG_OK("Create chunk %i %i %i", chunk_x, chunk_y, chunk_z)
+    //LOG_OK("Create chunk %i %i %i", chunk_x, chunk_y, chunk_z)
     return chunk;
 }
 

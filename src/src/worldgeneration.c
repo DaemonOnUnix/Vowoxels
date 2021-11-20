@@ -82,7 +82,7 @@ void updateCoord(int* dir, int32_t* x, int32_t* y, int32_t* z, int32_t camx, int
         PANIC("How did you get there ?");
         break;
     }
-    LOG_INFO("Updating Coord x: %i; y: %i; z: %i, dir: %i", *x, *y, *z, *dir)
+    //LOG_INFO("Updating Coord x: %i; y: %i; z: %i, dir: %i", *x, *y, *z, *dir)
 }
 
 Chunk* generateChunk(int32_t x, int32_t y, int32_t z){

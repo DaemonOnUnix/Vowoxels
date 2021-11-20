@@ -86,10 +86,24 @@ bool RayCast(Ray ray, RaycastHit* hit){
                                 float inter_lenght = 0;
                                 if(isRayCollideAABB(ray, &inter_lenght, chunkcoord.x+voxelx, chunkcoord.x+voxelx+1.0f, chunkcoord.y+voxely, chunkcoord.y+voxely+1.0f, chunkcoord.z+voxelz, chunkcoord.z+voxelz+1.0f)){
                                     //debugDrawBox(vec3_add(chunkcoord, vec3$(voxelx, voxely, voxelz)), vec3$(1, 1, 1), vec3$(0,0,1), 10);
-                                    hit->point = vec3_add(chunkcoord, vec3$(voxelx, voxely, voxelz));
+                                    hit->hitpoint = vec3_add(ray.origin, vec3_mul_val(ray.dir, inter_lenght));
+                                    hit->normal = vec3$(0, 0, 0);
+                                    if (hit->hitpoint.x == chunkcoord.x + voxelx + 1.0f)
+                                        hit->normal.x = 1;
+                                    else if (hit->hitpoint.x == chunkcoord.x + voxelx)
+                                        hit->normal.x = -1;
+                                    if (hit->hitpoint.y == chunkcoord.y + voxely + 1.0f)
+                                        hit->normal.y = 1;
+                                    else if (hit->hitpoint.y == chunkcoord.y + voxely)
+                                        hit->normal.y = -1;
+                                    if (hit->hitpoint.z == chunkcoord.z + voxelz + 1.0f)
+                                        hit->normal.z = 1;
+                                    else if (hit->hitpoint.z == chunkcoord.z + voxelz)
+                                        hit->normal.z = -1;
                                     hit->type = CHUNK;
                                     hit->lenght = inter_lenght;
-                                    hit->object = chunk;
+                                    hit->object.Chunk.chunk = chunk;
+                                    hit->object.Chunk.local_block_coord = vec3$(voxelx, voxely, voxelz);
                                     return true;
                                 }
                             }

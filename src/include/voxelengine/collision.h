@@ -2,6 +2,7 @@
 #define VOXELENGINE_COLLISION_H
 
 #include "linear_algebra/vec3.h"
+#include "voxelengine/chunk.h"
 
 typedef enum {
     ALL,
@@ -9,13 +10,14 @@ typedef enum {
     PLAYER
 } ObjectType;
 
-typedef struct
+typedef union
 {
-    ObjectType type;
-    void *object;
-    Vec3 point;
-    float lenght;
-} RaycastHit;
+    struct
+    {
+        Chunk *chunk;
+        Vec3 local_block_coord;
+    } Chunk;
+} Object;
 
 typedef struct
 {
@@ -25,7 +27,18 @@ typedef struct
     ObjectType type;
 } Ray;
 
+typedef struct
+{
+    Ray *ray;
+    ObjectType type;
+    Object object;
+    Vec3 hitpoint;
+    Vec3 normal;
+    float lenght;
+} RaycastHit;
+
 bool isRayCollideAABB(Ray r, float* inter_lenght, float minX, float maxX, float minY, float maxY, float minZ, float maxZ);
+
 static inline bool isPointInsideAABB(Vec3 point, float minX, float maxX, float minY, float maxY, float minZ, float maxZ) {
   return (point.x >= minX && point.x <= maxX) &&
          (point.y >= minY && point.y <= maxY) &&
